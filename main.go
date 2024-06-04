@@ -8,7 +8,17 @@ import (
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/gorilla/mux"
 )
+
+func getEnv(key string, defaultValue string) string {
+	envValue := os.Getenv(key)
+	if envValue == "" {
+		return defaultValue
+	}
+	return envValue
+}
 
 func main() {
 
@@ -16,11 +26,21 @@ func main() {
 
 	productsHandler := handlers.NewProducts(logger)
 
-	serveMux := http.NewServeMux()
-	serveMux.Handle("/", productsHandler)
+	serveMux := mux.NewRouter()
+	getRouter := serveMux.Methods("GET").Subrouter()
+	getRouter.HandleFunc("/", productsHandler.GetProducts)
 
+	putRouter := serveMux.Methods("PUT").Subrouter()
+	putRouter.Use(productsHandler.MiddlewareValidateProduct)
+	putRouter.HandleFunc("/{id:[0-9]+}", productsHandler.UpdateProduct)
+
+	postRouter := serveMux.Methods("POST").Subrouter()
+	postRouter.Use(productsHandler.MiddlewareValidateProduct)
+	postRouter.HandleFunc("/", productsHandler.AddProduct)
+
+	bindAddress := getEnv("BIND_ADDRESS", ":9090")
 	server := &http.Server{
-		Addr:         ":9090",
+		Addr:         bindAddress,
 		Handler:      serveMux,
 		IdleTimeout:  120 * time.Second,
 		ReadTimeout:  1 * time.Second,
@@ -28,6 +48,7 @@ func main() {
 	}
 
 	go func() {
+		logger.Printf("Starting Http Server at %v\n", bindAddress)
 		err := server.ListenAndServe()
 		if err != nil {
 			logger.Fatal(err)

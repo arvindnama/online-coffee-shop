@@ -4,15 +4,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"regexp"
 	"time"
+
+	"github.com/go-playground/validator/v10"
 )
 
 type Product struct {
-	ID          int     `json:"id"`   // These are called field tags (annotations)
-	Name        string  `json:"name"` // json:"<>" we can change the name of the field (while marshalling)
+	ID int `json:"id"`
+	// These are called field tags (annotations)
+	Name string `json:"name" validate:"required"`
+	// json:"<>" we can change the name of the field (while marshalling)
 	Description string  `json:"description"`
-	Price       float32 `json:"price"`
-	SKU         string  `json:"sku"`
+	Price       float32 `json:"price" validate:"gt=0,required"`
+	SKU         string  `json:"sku" validate:"required,sku"`
 	CreatedOn   string  `json:"-"` // json: "-" indicated field will be omitted
 	UpdatedOn   string  `json:"-"`
 	DeletedOn   string  `json:"-"`
@@ -21,6 +26,20 @@ type Product struct {
 var ErrPrdNotFound = fmt.Errorf("product not found")
 
 type Products []*Product
+
+func (p *Product) Validate() error {
+	validator := validator.New()
+	validator.RegisterValidation("sku", validateSKU)
+	return validator.Struct(p)
+}
+
+func validateSKU(fl validator.FieldLevel) bool {
+	// sku format: xxxx-xxxx-xxxx
+	re := regexp.MustCompile(`[a-z]+-[a-z]+-[a-z]+`)
+	matches := re.FindAllString(fl.Field().String(), -1)
+
+	return len(matches) == 1
+}
 
 func (p *Products) ToJSON(w io.Writer) error {
 	encoder := json.NewEncoder(w)
