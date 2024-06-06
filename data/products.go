@@ -5,22 +5,44 @@ import (
 	"fmt"
 	"io"
 	"regexp"
-	"time"
 
 	"github.com/go-playground/validator/v10"
 )
 
+// Product defines the structure for an API products
+// swagger:model Product
 type Product struct {
+	//this if of the product
+	//
+	// required: true
+	// min:1
 	ID int `json:"id"`
-	// These are called field tags (annotations)
+
+	// the name for this product
+	//
+	// required: true
+	// max length: 255
 	Name string `json:"name" validate:"required"`
-	// json:"<>" we can change the name of the field (while marshalling)
-	Description string  `json:"description"`
-	Price       float32 `json:"price" validate:"gt=0,required"`
-	SKU         string  `json:"sku" validate:"required,sku"`
-	CreatedOn   string  `json:"-"` // json: "-" indicated field will be omitted
-	UpdatedOn   string  `json:"-"`
-	DeletedOn   string  `json:"-"`
+
+	// the description for this product
+	//
+	// required: false
+	// max length: 10000
+	Description string `json:"description"`
+
+	// the price for the product
+	//
+	// required: true
+	// min: 0.01
+	Price float32 `json:"price" validate:"gt=0,required"`
+
+	// the SKU for the product
+	//
+	// required: true
+	// pattern: [a-z]+-[a-z]+-[a-z]+
+	SKU string `json:"sku" validate:"required,sku"`
+	// json: "-" indicated field will be omitted
+
 }
 
 var ErrPrdNotFound = fmt.Errorf("product not found")
@@ -63,6 +85,17 @@ func UpdateProduct(id int, prod *Product) error {
 	return nil
 }
 
+func DeleteProduct(id int) error {
+	pos, err := findProduct(id)
+
+	if err != nil {
+		return err
+	}
+
+	productList = append(productList[:pos], productList[pos+1])
+	return nil
+}
+
 func findProduct(id int) (int, error) {
 	for i, p := range productList {
 		if p.ID == id {
@@ -88,18 +121,14 @@ var productList = []*Product{
 		Name:        "Latte",
 		Description: "Frothy milky coffee",
 		Price:       2.45,
-		SKU:         "abc323",
-		CreatedOn:   time.Now().UTC().String(),
-		UpdatedOn:   time.Now().UTC().String(),
+		SKU:         "abc-xyz-lmn",
 	},
 	&Product{
 		ID:          2,
 		Name:        "Espresso",
 		Description: "Short and string coffee without milk",
 		Price:       1.99,
-		SKU:         "fcf123",
-		CreatedOn:   time.Now().UTC().String(),
-		UpdatedOn:   time.Now().UTC().String(),
+		SKU:         "xyz-ijk-abc",
 	},
 }
 

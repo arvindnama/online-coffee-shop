@@ -1,3 +1,18 @@
+// Package classification of Product API
+//
+// Documentation for Product API
+//
+//	Schemes: http
+//	BasePath: /
+//	Version: 1.0.0
+//
+//	Consumes:
+//	- application/json
+//
+//	Produces:
+//	- application/json
+//
+// swagger:meta
 package handlers
 
 import (
@@ -6,10 +21,27 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
-
-	"github.com/gorilla/mux"
 )
+
+// A list of products
+// swagger:response productsResponse
+type ProductsResponse struct {
+	// All products in the system
+	// in: body
+	Body []data.Products
+}
+
+// swagger:parameters deleteProduct
+type productIDPathParameterWrapper struct {
+	// The id of the product to delete
+	// in: path
+	// required: true
+	ID int `json:"id"`
+}
+
+// swagger:response noContentResponse
+type noContentResponseWrapper struct {
+}
 
 type Products struct {
 	l *log.Logger
@@ -20,52 +52,6 @@ type KeyProduct struct {
 
 func NewProducts(l *log.Logger) *Products {
 	return &Products{l}
-}
-
-func (p *Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
-	p.l.Println("Handle Update product")
-
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-
-	if err != nil {
-		http.Error(rw, "Invalid ID", http.StatusBadRequest)
-		return
-	}
-
-	prod := r.Context().Value(KeyProduct{}).(*data.Product) // this is how we cast
-
-	err = data.UpdateProduct(id, prod)
-
-	if err == data.ErrPrdNotFound {
-		http.Error(rw, "Product not found", http.StatusNotFound)
-		return
-	}
-
-	if err != nil {
-		http.Error(rw, "Product not found", http.StatusInternalServerError)
-		return
-	}
-
-}
-
-func (p *Products) AddProduct(rw http.ResponseWriter, r *http.Request) {
-	p.l.Println("Handle POST products")
-
-	prod := r.Context().Value(KeyProduct{}).(*data.Product) // this is how we cast
-
-	data.AddProduct(prod)
-}
-
-func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
-	p.l.Println("Handle GET products")
-	products := data.GetProducts()
-	err := products.ToJSON(rw)
-
-	if err != nil {
-		http.Error(rw, "Unable to marshal produces", http.StatusInternalServerError)
-	}
-
 }
 
 func (p *Products) MiddlewareValidateProduct(next http.Handler) http.Handler {
