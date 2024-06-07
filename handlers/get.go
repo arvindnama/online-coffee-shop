@@ -13,7 +13,7 @@ import (
 func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
 	p.l.Println("Handle GET products")
 	products := data.GetProducts()
-	err := products.ToJSON(rw)
+	err := data.ToJSON(products, rw)
 
 	if err != nil {
 		http.Error(rw, "Unable to marshal produces", http.StatusInternalServerError)

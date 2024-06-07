@@ -1,85 +1,46 @@
-// Package classification of Product API
-//
-// Documentation for Product API
-//
-//	Schemes: http
-//	BasePath: /
-//	Version: 1.0.0
-//
-//	Consumes:
-//	- application/json
-//
-//	Produces:
-//	- application/json
-//
-// swagger:meta
 package handlers
 
 import (
 	"build-go-microservice/data"
-	"context"
-	"fmt"
 	"log"
 	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
-
-// A list of products
-// swagger:response productsResponse
-type ProductsResponse struct {
-	// All products in the system
-	// in: body
-	Body []data.Products
-}
-
-// swagger:parameters deleteProduct
-type productIDPathParameterWrapper struct {
-	// The id of the product to delete
-	// in: path
-	// required: true
-	ID int `json:"id"`
-}
-
-// swagger:response noContentResponse
-type noContentResponseWrapper struct {
-}
 
 type Products struct {
 	l *log.Logger
+	v *data.Validation
 }
 
 type KeyProduct struct {
 }
 
-func NewProducts(l *log.Logger) *Products {
-	return &Products{l}
+func NewProducts(l *log.Logger, v *data.Validation) *Products {
+	return &Products{l, v}
 }
 
-func (p *Products) MiddlewareValidateProduct(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		prod := &data.Product{}
-		err := prod.FromJson(r.Body)
-		if err != nil {
-			p.l.Println("[ERROR] deserializing product", err)
-			http.Error(rw, "Unable to deserialize Product json", http.StatusBadRequest)
-			return
-		}
+//swagger:model
+type GenericError struct {
+	Message string `json:"message"`
+}
 
-		err = prod.Validate()
-		if err != nil {
-			p.l.Println("[ERROR] validating product", err)
-			http.Error(
-				rw,
-				fmt.Sprintf("Error validating product: %s", err),
-				http.StatusBadRequest,
-			)
-			return
-		}
+// ValidationError is a collection error messages
+//
+//swagger:model
+type ValidationError struct {
+	Messages []string `json:"messages"`
+}
 
-		// add product to the context
-		ctx := context.WithValue(r.Context(), KeyProduct{}, prod)
-		r = r.WithContext(ctx)
+func getProductID(r *http.Request) int {
+	vars := mux.Vars(r)
 
-		// call the next handler
-		next.ServeHTTP(rw, r)
-	})
+	id, err := strconv.Atoi(vars["id"])
+
+	if err != nil {
+		panic(err)
+	}
+
+	return id
 }
