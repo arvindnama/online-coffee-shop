@@ -1,6 +1,7 @@
 package main
 
 import (
+	"build-go-microservice/data"
 	"build-go-microservice/handlers"
 	"context"
 	"log"
@@ -24,8 +25,9 @@ func getEnv(key string, defaultValue string) string {
 func main() {
 
 	logger := log.New(os.Stdout, "product-api", log.LstdFlags)
+	validation := data.NewValidation()
 
-	productsHandler := handlers.NewProducts(logger)
+	productsHandler := handlers.NewProducts(logger, validation)
 
 	serveMux := mux.NewRouter()
 	getRouter := serveMux.Methods("GET").Subrouter()

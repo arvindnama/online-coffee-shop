@@ -1,16 +1,45 @@
 package data
 
-import "testing"
+import (
+	"bytes"
+	"fmt"
+	"testing"
 
-func TestChecksValidation(t *testing.T) {
+	"github.com/stretchr/testify/assert"
+)
+
+func TestProductMissingNameReturnsErr(t *testing.T) {
 	p := &Product{
-		Name:  "test",
 		Price: 19,
-		SKU:   "abs-abs-abs",
+		SKU:   "abc-abc-def",
 	}
-	err := p.Validate()
+	v := NewValidation()
+	err := v.Validate(p)
+	fmt.Println(err.Errors())
+	assert.Len(t, err, 1)
 
-	if err != nil {
-		t.Fatal(err)
+}
+
+func TestProductMissingPriceReturnsErr(t *testing.T) {
+
+	p := &Product{
+		Name: "P1",
+		SKU:  "abc-cdf-ghi",
 	}
+
+	v := NewValidation()
+	err := v.Validate(p)
+	assert.Len(t, err, 1)
+}
+
+func TestProductsToJSON(t *testing.T) {
+	ps := []*Product{
+		&Product{
+			Name: "abc",
+		},
+	}
+
+	b := bytes.NewBufferString("")
+	err := ToJSON(ps, b)
+	assert.NoError(t, err)
 }

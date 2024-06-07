@@ -2,9 +2,14 @@ basePath: /
 consumes:
     - application/json
 definitions:
+    GenericError:
+        x-go-package: build-go-microservice/handlers
     Product:
         description: Product defines the structure for an API products
         x-go-package: build-go-microservice/data
+    ValidationError:
+        description: ValidationError is a collection error messages
+        x-go-package: build-go-microservice/handlers
 info:
     description: Documentation for Product API
     title: of Product API
@@ -25,14 +30,10 @@ paths:
             responses:
                 "200":
                     $ref: '#/responses/noContentResponse'
-            tags:
-                - products
-        put:
-            description: Update a products details
-            operationId: updateProduct
-            responses:
-                "201":
-                    $ref: '#/responses/noContentResponse'
+                "422":
+                    $ref: '#/responses/errorValidation'
+                "501":
+                    $ref: '#/responses/errorResponse'
             tags:
                 - products
     /products/{id}:
@@ -50,11 +51,31 @@ paths:
             responses:
                 "200":
                     $ref: '#/responses/noContentResponse'
+                "404":
+                    $ref: '#/responses/errorResponse'
+                "501":
+                    $ref: '#/responses/errorResponse'
+            tags:
+                - products
+        put:
+            description: Update a products details
+            operationId: updateProduct
+            responses:
+                "201":
+                    $ref: '#/responses/noContentResponse'
+                "404":
+                    $ref: '#/responses/errorResponse'
+                "422":
+                    $ref: '#/responses/errorValidation'
             tags:
                 - products
 produces:
     - application/json
 responses:
+    errorResponse:
+        description: Generic Error message as string
+    errorValidation:
+        description: Validation errors defined as array of string
     noContentResponse:
         description: ""
     productsResponse:

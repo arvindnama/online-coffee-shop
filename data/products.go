@@ -1,12 +1,7 @@
 package data
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"regexp"
-
-	"github.com/go-playground/validator/v10"
 )
 
 // Product defines the structure for an API products
@@ -49,25 +44,6 @@ var ErrPrdNotFound = fmt.Errorf("product not found")
 
 type Products []*Product
 
-func (p *Product) Validate() error {
-	validator := validator.New()
-	validator.RegisterValidation("sku", validateSKU)
-	return validator.Struct(p)
-}
-
-func validateSKU(fl validator.FieldLevel) bool {
-	// sku format: xxxx-xxxx-xxxx
-	re := regexp.MustCompile(`[a-z]+-[a-z]+-[a-z]+`)
-	matches := re.FindAllString(fl.Field().String(), -1)
-
-	return len(matches) == 1
-}
-
-func (p *Products) ToJSON(w io.Writer) error {
-	encoder := json.NewEncoder(w)
-	return encoder.Encode(p)
-}
-
 func AddProduct(prod *Product) {
 	prod.ID = getNextId()
 	productList = append(productList, prod)
@@ -108,11 +84,6 @@ func findProduct(id int) (int, error) {
 func getNextId() int {
 	lp := productList[len(productList)-1]
 	return lp.ID + 1
-}
-
-func (p *Product) FromJson(r io.Reader) error {
-	d := json.NewDecoder(r)
-	return d.Decode(p)
 }
 
 var productList = []*Product{
