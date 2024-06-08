@@ -43,20 +43,22 @@ func main() {
 	corsHandler := goHandlers.CORS(
 		goHandlers.AllowedOrigins([]string{"http://localhost:3000"}),
 	)
-	postHandler := serverMux.NewRoute().Methods(http.MethodPost).Subrouter()
+	postRouter := serverMux.NewRoute().Methods(http.MethodPost).Subrouter()
 
-	postHandler.HandleFunc(
+	postRouter.HandleFunc(
 		"/images/{id:[0-9]+}/{filename:[a-zA-Z]+.[a-z]{3}}",
 		filesHandler.UploadREST,
 	)
-	postHandler.HandleFunc(
+	postRouter.HandleFunc(
 		"/",
 		filesHandler.UploadMultipart,
 	)
 
-	getHandler := serverMux.NewRoute().Methods(http.MethodGet).Subrouter()
+	getRouter := serverMux.NewRoute().Methods(http.MethodGet).Subrouter()
 
-	getHandler.Handle(
+	gm := handlers.NewGzipHandler(logger)
+	getRouter.Use(gm.GzipMiddleware)
+	getRouter.Handle(
 		"/images/{id:[0-9]+}/{filename:[a-zA-Z]+.[a-z]{3}}",
 		http.StripPrefix("/images/", http.FileServer(http.Dir(*basePath))),
 	)
