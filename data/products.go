@@ -61,6 +61,17 @@ func UpdateProduct(id int, prod *Product) error {
 	return nil
 }
 
+func GetProductById(id int) (*Product, error) {
+	pos, err := findProduct(id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return productList[pos], nil
+
+}
+
 func DeleteProduct(id int) error {
 	pos, err := findProduct(id)
 
@@ -87,14 +98,14 @@ func getNextId() int {
 }
 
 var productList = []*Product{
-	&Product{
+	{
 		ID:          1,
 		Name:        "Latte",
 		Description: "Frothy milky coffee",
 		Price:       2.45,
 		SKU:         "abc-xyz-lmn",
 	},
-	&Product{
+	{
 		ID:          2,
 		Name:        "Espresso",
 		Description: "Short and string coffee without milk",

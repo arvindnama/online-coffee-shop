@@ -3,12 +3,14 @@ consumes:
     - application/json
 definitions:
     GenericError:
+        description: GenericError GenericError GenericError generic error
         properties:
             message:
+                description: message
                 type: string
                 x-go-name: Message
         type: object
-        x-go-package: build-go-microservice/handlers
+        x-go-package: build-go-microservice/sdk/models
     Product:
         description: Product defines the structure for an API products
         properties:
@@ -47,20 +49,22 @@ definitions:
         type: object
         x-go-package: build-go-microservice/data
     Products:
+        description: Products Products Products products
         items:
             $ref: '#/definitions/Product'
         type: array
-        x-go-package: build-go-microservice/data
+        x-go-package: build-go-microservice/sdk/models
     ValidationError:
-        description: ValidationError is a collection error messages
+        description: ValidationError ValidationError ValidationError is a collection error messages
         properties:
             messages:
+                description: messages
                 items:
                     type: string
                 type: array
                 x-go-name: Messages
         type: object
-        x-go-package: build-go-microservice/handlers
+        x-go-package: build-go-microservice/sdk/models
 info:
     description: Documentation for Product API
     title: of Product API
@@ -73,7 +77,7 @@ paths:
             responses:
                 "200":
                     $ref: '#/responses/ProductsResponse'
-                "404":
+                "501":
                     $ref: '#/responses/ErrorResponse'
             tags:
                 - products
@@ -93,6 +97,14 @@ paths:
         delete:
             description: Deletes the product from the database
             operationId: deleteProduct
+            parameters:
+                - description: The id of the product
+                  format: int64
+                  in: path
+                  name: id
+                  required: true
+                  type: integer
+                  x-go-name: ID
             responses:
                 "200":
                     $ref: '#/responses/NoContentResponse'
@@ -102,9 +114,37 @@ paths:
                     $ref: '#/responses/ErrorResponse'
             tags:
                 - products
+        get:
+            description: Returns a product
+            operationId: listProduct
+            parameters:
+                - description: The id of the product
+                  format: int64
+                  in: path
+                  name: id
+                  required: true
+                  type: integer
+                  x-go-name: ID
+            responses:
+                "200":
+                    $ref: '#/responses/ProductResponse'
+                "404":
+                    $ref: '#/responses/ErrorResponse'
+                "501":
+                    $ref: '#/responses/ErrorResponse'
+            tags:
+                - products
         put:
             description: Update a products details
             operationId: updateProduct
+            parameters:
+                - description: The id of the product
+                  format: int64
+                  in: path
+                  name: id
+                  required: true
+                  type: integer
+                  x-go-name: ID
             responses:
                 "201":
                     $ref: '#/responses/NoContentResponse'
@@ -127,12 +167,14 @@ responses:
             $ref: '#/definitions/ValidationError'
     NoContentResponse:
         description: ""
+    ProductResponse:
+        description: Product
+        schema:
+            $ref: '#/definitions/Product'
     ProductsResponse:
         description: A list of products
         schema:
-            items:
-                $ref: '#/definitions/Products'
-            type: array
+            $ref: '#/definitions/Products'
 schemes:
     - http
 swagger: "2.0"

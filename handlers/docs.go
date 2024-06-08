@@ -22,12 +22,20 @@ import "build-go-microservice/data"
 type ProductsResponse struct {
 	// All products in the system
 	// in: body
-	Body []data.Products
+	Body data.Products
 }
 
-// swagger:parameters DeleteProduct
+// Product
+// swagger:response ProductResponse
+type ProductResponse struct {
+	// Products
+	// in: body
+	Body data.Product
+}
+
+// swagger:parameters listProduct deleteProduct updateProduct
 type ProductIDPathParameterWrapper struct {
-	// The id of the product to delete
+	// The id of the product
 	// in: path
 	// required: true
 	ID int `json:"id"`

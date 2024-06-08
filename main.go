@@ -31,7 +31,8 @@ func main() {
 
 	serveMux := mux.NewRouter()
 	getRouter := serveMux.Methods("GET").Subrouter()
-	getRouter.HandleFunc("/products", productsHandler.GetProducts)
+	getRouter.HandleFunc("/products", productsHandler.GetAllProducts)
+	getRouter.HandleFunc("/products/{id:[0-9]+}", productsHandler.GetProduct)
 
 	putRouter := serveMux.Methods("PUT").Subrouter()
 	putRouter.Use(productsHandler.MiddlewareValidateProduct)
