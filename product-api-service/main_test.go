@@ -1,9 +1,9 @@
 package main
 
 import (
-	"build-go-microservice/sdk/client"
-	"build-go-microservice/sdk/client/products"
 	"fmt"
+	"product-api-service/sdk/client"
+	"product-api-service/sdk/client/products"
 	"testing"
 )
 

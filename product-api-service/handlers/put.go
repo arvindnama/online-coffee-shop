@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"build-go-microservice/data"
 	"net/http"
+	"product-api-service/data"
 )
 
 // swagger:route PUT /products/{id} products updateProduct

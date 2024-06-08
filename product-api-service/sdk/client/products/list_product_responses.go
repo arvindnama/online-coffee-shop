@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
 
-	"build-go-microservice/sdk/models"
+	"product-api-service/sdk/models"
 )
 
 // ListProductReader is a Reader for the ListProduct structure.

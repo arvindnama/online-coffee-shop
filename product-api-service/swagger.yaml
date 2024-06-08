@@ -3,16 +3,16 @@ consumes:
     - application/json
 definitions:
     GenericError:
-        description: GenericError GenericError GenericError generic error
+        description: GenericError GenericError GenericError GenericError generic error
         properties:
             message:
                 description: message
                 type: string
                 x-go-name: Message
         type: object
-        x-go-package: build-go-microservice/sdk/models
+        x-go-package: product-api-service/sdk/models
     Product:
-        description: Product defines the structure for an API products
+        description: Product Product defines the structure for an API products
         properties:
             description:
                 description: the description for this product
@@ -47,15 +47,15 @@ definitions:
             - price
             - sku
         type: object
-        x-go-package: build-go-microservice/data
+        x-go-package: product-api-service/sdk/models
     Products:
-        description: Products Products Products products
+        description: Products Products Products Products products
         items:
             $ref: '#/definitions/Product'
         type: array
-        x-go-package: build-go-microservice/sdk/models
+        x-go-package: product-api-service/sdk/models
     ValidationError:
-        description: ValidationError ValidationError ValidationError is a collection error messages
+        description: ValidationError is a collection error messages
         properties:
             messages:
                 description: messages
@@ -64,7 +64,7 @@ definitions:
                 type: array
                 x-go-name: Messages
         type: object
-        x-go-package: build-go-microservice/sdk/models
+        x-go-package: product-api-service/handlers
 info:
     description: Documentation for Product API
     title: of Product API

@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"build-go-microservice/data"
 	"log"
 	"net/http"
+	"product-api-service/data"
 	"strconv"
 
 	"github.com/gorilla/mux"
