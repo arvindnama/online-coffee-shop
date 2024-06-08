@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/go-openapi/runtime/middleware"
+	gorillaHandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -52,10 +53,14 @@ func main() {
 	getRouter.Handle("/docs", redocGetDocHandler)
 	getRouter.Handle("/swagger.yaml", http.FileServer(http.Dir("./")))
 
+	corsHandler := gorillaHandlers.CORS(
+		gorillaHandlers.AllowedOrigins([]string{"http://localhost:3000"}),
+	)
+
 	bindAddress := getEnv("BIND_ADDRESS", ":9090")
 	server := &http.Server{
 		Addr:         bindAddress,
-		Handler:      serveMux,
+		Handler:      corsHandler(serveMux),
 		IdleTimeout:  120 * time.Second,
 		ReadTimeout:  1 * time.Second,
 		WriteTimeout: 1 * time.Second,
