@@ -9,6 +9,7 @@ import (
 	"product-images-service/handlers"
 	"time"
 
+	goHandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	hclog "github.com/hashicorp/go-hclog"
 	"github.com/nicholasjackson/env"
@@ -39,11 +40,18 @@ func main() {
 
 	serverMux := mux.NewRouter()
 
+	corsHandler := goHandlers.CORS(
+		goHandlers.AllowedOrigins([]string{"http://localhost:3000"}),
+	)
 	postHandler := serverMux.NewRoute().Methods(http.MethodPost).Subrouter()
 
 	postHandler.HandleFunc(
 		"/images/{id:[0-9]+}/{filename:[a-zA-Z]+.[a-z]{3}}",
-		filesHandler.ServeHttp,
+		filesHandler.UploadREST,
+	)
+	postHandler.HandleFunc(
+		"/",
+		filesHandler.UploadMultipart,
 	)
 
 	getHandler := serverMux.NewRoute().Methods(http.MethodGet).Subrouter()
@@ -55,7 +63,7 @@ func main() {
 
 	server := http.Server{
 		Addr:         *bindAddress,
-		Handler:      serverMux,
+		Handler:      corsHandler(serverMux),
 		ErrorLog:     stgLogger,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
