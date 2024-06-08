@@ -1,0 +1,180 @@
+basePath: /
+consumes:
+    - application/json
+definitions:
+    GenericError:
+        description: GenericError GenericError GenericError generic error
+        properties:
+            message:
+                description: message
+                type: string
+                x-go-name: Message
+        type: object
+        x-go-package: build-go-microservice/sdk/models
+    Product:
+        description: Product defines the structure for an API products
+        properties:
+            description:
+                description: the description for this product
+                maxLength: 10000
+                type: string
+                x-go-name: Description
+            id:
+                description: this if of the product
+                format: int64
+                minimum: 1
+                type: integer
+                x-go-name: ID
+            name:
+                description: the name for this product
+                maxLength: 255
+                type: string
+                x-go-name: Name
+            price:
+                description: the price for the product
+                format: float
+                minimum: 0.01
+                type: number
+                x-go-name: Price
+            sku:
+                description: the SKU for the product
+                pattern: '[a-z]+-[a-z]+-[a-z]+'
+                type: string
+                x-go-name: SKU
+        required:
+            - id
+            - name
+            - price
+            - sku
+        type: object
+        x-go-package: build-go-microservice/data
+    Products:
+        description: Products Products Products products
+        items:
+            $ref: '#/definitions/Product'
+        type: array
+        x-go-package: build-go-microservice/sdk/models
+    ValidationError:
+        description: ValidationError ValidationError ValidationError is a collection error messages
+        properties:
+            messages:
+                description: messages
+                items:
+                    type: string
+                type: array
+                x-go-name: Messages
+        type: object
+        x-go-package: build-go-microservice/sdk/models
+info:
+    description: Documentation for Product API
+    title: of Product API
+    version: 1.0.0
+paths:
+    /products:
+        get:
+            description: Returns a list of products
+            operationId: listProducts
+            responses:
+                "200":
+                    $ref: '#/responses/ProductsResponse'
+                "501":
+                    $ref: '#/responses/ErrorResponse'
+            tags:
+                - products
+        post:
+            description: Add a product into the database
+            operationId: createProduct
+            responses:
+                "200":
+                    $ref: '#/responses/NoContentResponse'
+                "422":
+                    $ref: '#/responses/ErrorValidation'
+                "501":
+                    $ref: '#/responses/ErrorResponse'
+            tags:
+                - products
+    /products/{id}:
+        delete:
+            description: Deletes the product from the database
+            operationId: deleteProduct
+            parameters:
+                - description: The id of the product
+                  format: int64
+                  in: path
+                  name: id
+                  required: true
+                  type: integer
+                  x-go-name: ID
+            responses:
+                "200":
+                    $ref: '#/responses/NoContentResponse'
+                "404":
+                    $ref: '#/responses/ErrorResponse'
+                "501":
+                    $ref: '#/responses/ErrorResponse'
+            tags:
+                - products
+        get:
+            description: Returns a product
+            operationId: listProduct
+            parameters:
+                - description: The id of the product
+                  format: int64
+                  in: path
+                  name: id
+                  required: true
+                  type: integer
+                  x-go-name: ID
+            responses:
+                "200":
+                    $ref: '#/responses/ProductResponse'
+                "404":
+                    $ref: '#/responses/ErrorResponse'
+                "501":
+                    $ref: '#/responses/ErrorResponse'
+            tags:
+                - products
+        put:
+            description: Update a products details
+            operationId: updateProduct
+            parameters:
+                - description: The id of the product
+                  format: int64
+                  in: path
+                  name: id
+                  required: true
+                  type: integer
+                  x-go-name: ID
+            responses:
+                "201":
+                    $ref: '#/responses/NoContentResponse'
+                "404":
+                    $ref: '#/responses/ErrorResponse'
+                "422":
+                    $ref: '#/responses/ErrorValidation'
+            tags:
+                - products
+produces:
+    - application/json
+responses:
+    ErrorResponse:
+        description: Generic Error message as string
+        schema:
+            $ref: '#/definitions/GenericError'
+    ErrorValidation:
+        description: Validation errors defined as array of string
+        schema:
+            $ref: '#/definitions/ValidationError'
+    NoContentResponse:
+        description: ""
+    ProductResponse:
+        description: Product
+        schema:
+            $ref: '#/definitions/Product'
+    ProductsResponse:
+        description: A list of products
+        schema:
+            $ref: '#/definitions/Products'
+schemes:
+    - http
+swagger: "2.0"

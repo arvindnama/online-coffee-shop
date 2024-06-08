@@ -10,9 +10,9 @@ import (
 //
 // responses:
 //
-//	201: noContentResponse
-//	404: errorResponse
-//	422: errorValidation
+//	201: NoContentResponse
+//	404: ErrorResponse
+//	422: ErrorValidation
 func (p *Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
 	p.l.Println("Handle Update product")
 

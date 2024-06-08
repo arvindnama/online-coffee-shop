@@ -9,9 +9,9 @@ import (
 // Deletes the product from the database
 // responses:
 //
-//	200: noContentResponse
-//	404: errorResponse
-//	501: errorResponse
+//	200: NoContentResponse
+//	404: ErrorResponse
+//	501: ErrorResponse
 func (p *Products) DeleteProduct(rw http.ResponseWriter, r *http.Request) {
 	p.l.Println("Handle Delete product")
 

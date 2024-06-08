@@ -18,27 +18,35 @@ package handlers
 import "build-go-microservice/data"
 
 // A list of products
-// swagger:response productsResponse
+// swagger:response ProductsResponse
 type ProductsResponse struct {
 	// All products in the system
 	// in: body
-	Body []data.Products
+	Body data.Products
 }
 
-// swagger:parameters deleteProduct
-type productIDPathParameterWrapper struct {
-	// The id of the product to delete
+// Product
+// swagger:response ProductResponse
+type ProductResponse struct {
+	// Products
+	// in: body
+	Body data.Product
+}
+
+// swagger:parameters listProduct deleteProduct updateProduct
+type ProductIDPathParameterWrapper struct {
+	// The id of the product
 	// in: path
 	// required: true
 	ID int `json:"id"`
 }
 
-// swagger:response noContentResponse
-type noContentResponseWrapper struct {
+// swagger:response NoContentResponse
+type NoContentResponseWrapper struct {
 }
 
 // Generic Error message as string
-// swagger:response errorResponse
+// swagger:response ErrorResponse
 type ErrorResponseWrapper struct {
 	// Description of Error
 	// in: body
@@ -47,7 +55,7 @@ type ErrorResponseWrapper struct {
 
 // Validation errors defined as array of string
 //
-//swagger:response errorValidation
+//swagger:response ErrorValidation
 type ErrorValidationWrapper struct {
 	// collection of validation errors
 	//in: body

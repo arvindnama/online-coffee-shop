@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/go-openapi/runtime/middleware"
+	gorillaHandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -31,30 +32,35 @@ func main() {
 
 	serveMux := mux.NewRouter()
 	getRouter := serveMux.Methods("GET").Subrouter()
-	getRouter.HandleFunc("/", productsHandler.GetProducts)
+	getRouter.HandleFunc("/products", productsHandler.GetAllProducts)
+	getRouter.HandleFunc("/products/{id:[0-9]+}", productsHandler.GetProduct)
 
 	putRouter := serveMux.Methods("PUT").Subrouter()
 	putRouter.Use(productsHandler.MiddlewareValidateProduct)
-	putRouter.HandleFunc("/{id:[0-9]+}", productsHandler.UpdateProduct)
+	putRouter.HandleFunc("/products/{id:[0-9]+}", productsHandler.UpdateProduct)
 
 	postRouter := serveMux.Methods("POST").Subrouter()
 	postRouter.Use(productsHandler.MiddlewareValidateProduct)
-	postRouter.HandleFunc("/", productsHandler.AddProduct)
+	postRouter.HandleFunc("/products", productsHandler.AddProduct)
 
 	deleteRouter := serveMux.Methods("DELETE").Subrouter()
-	deleteRouter.HandleFunc("/{id:[0-9]+}", productsHandler.DeleteProduct)
+	deleteRouter.HandleFunc("/product/{id:[0-9]+}", productsHandler.DeleteProduct)
 
 	ops := middleware.RedocOpts{SpecURL: "/swagger.yaml"}
 
-	getdocHandler := middleware.Redoc(ops, nil)
+	redocGetDocHandler := middleware.Redoc(ops, nil)
 
-	getRouter.Handle("/docs", getdocHandler)
+	getRouter.Handle("/docs", redocGetDocHandler)
 	getRouter.Handle("/swagger.yaml", http.FileServer(http.Dir("./")))
+
+	corsHandler := gorillaHandlers.CORS(
+		gorillaHandlers.AllowedOrigins([]string{"http://localhost:3000"}),
+	)
 
 	bindAddress := getEnv("BIND_ADDRESS", ":9090")
 	server := &http.Server{
 		Addr:         bindAddress,
-		Handler:      serveMux,
+		Handler:      corsHandler(serveMux),
 		IdleTimeout:  120 * time.Second,
 		ReadTimeout:  1 * time.Second,
 		WriteTimeout: 1 * time.Second,
