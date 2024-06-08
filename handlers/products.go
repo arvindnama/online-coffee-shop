@@ -21,14 +21,14 @@ func NewProducts(l *log.Logger, v *data.Validation) *Products {
 	return &Products{l, v}
 }
 
-//swagger:model
+//swagger:model GenericError
 type GenericError struct {
 	Message string `json:"message"`
 }
 
 // ValidationError is a collection error messages
 //
-//swagger:model
+//swagger:model ValidationError
 type ValidationError struct {
 	Messages []string `json:"messages"`
 }

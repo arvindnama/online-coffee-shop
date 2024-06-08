@@ -11,9 +11,9 @@ import (
 //
 // responses:
 //
-//	200: noContentResponse
-//	422: errorValidation
-//	501: errorResponse
+//	200: NoContentResponse
+//	422: ErrorValidation
+//	501: ErrorResponse
 func (p *Products) AddProduct(rw http.ResponseWriter, r *http.Request) {
 	p.l.Println("Handle POST products")
 

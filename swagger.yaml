@@ -3,12 +3,63 @@ consumes:
     - application/json
 definitions:
     GenericError:
+        properties:
+            message:
+                type: string
+                x-go-name: Message
+        type: object
         x-go-package: build-go-microservice/handlers
     Product:
         description: Product defines the structure for an API products
+        properties:
+            description:
+                description: the description for this product
+                maxLength: 10000
+                type: string
+                x-go-name: Description
+            id:
+                description: this if of the product
+                format: int64
+                minimum: 1
+                type: integer
+                x-go-name: ID
+            name:
+                description: the name for this product
+                maxLength: 255
+                type: string
+                x-go-name: Name
+            price:
+                description: the price for the product
+                format: float
+                minimum: 0.01
+                type: number
+                x-go-name: Price
+            sku:
+                description: the SKU for the product
+                pattern: '[a-z]+-[a-z]+-[a-z]+'
+                type: string
+                x-go-name: SKU
+        required:
+            - id
+            - name
+            - price
+            - sku
+        type: object
+        x-go-package: build-go-microservice/data
+    Products:
+        items:
+            $ref: '#/definitions/Product'
+        type: array
         x-go-package: build-go-microservice/data
     ValidationError:
         description: ValidationError is a collection error messages
+        properties:
+            messages:
+                items:
+                    type: string
+                type: array
+                x-go-name: Messages
+        type: object
         x-go-package: build-go-microservice/handlers
 info:
     description: Documentation for Product API
@@ -21,7 +72,9 @@ paths:
             operationId: listProducts
             responses:
                 "200":
-                    $ref: '#/responses/productsResponse'
+                    $ref: '#/responses/ProductsResponse'
+                "404":
+                    $ref: '#/responses/ErrorResponse'
             tags:
                 - products
         post:
@@ -29,32 +82,24 @@ paths:
             operationId: createProduct
             responses:
                 "200":
-                    $ref: '#/responses/noContentResponse'
+                    $ref: '#/responses/NoContentResponse'
                 "422":
-                    $ref: '#/responses/errorValidation'
+                    $ref: '#/responses/ErrorValidation'
                 "501":
-                    $ref: '#/responses/errorResponse'
+                    $ref: '#/responses/ErrorResponse'
             tags:
                 - products
     /products/{id}:
         delete:
             description: Deletes the product from the database
             operationId: deleteProduct
-            parameters:
-                - description: The id of the product to delete
-                  format: int64
-                  in: path
-                  name: id
-                  required: true
-                  type: integer
-                  x-go-name: ID
             responses:
                 "200":
-                    $ref: '#/responses/noContentResponse'
+                    $ref: '#/responses/NoContentResponse'
                 "404":
-                    $ref: '#/responses/errorResponse'
+                    $ref: '#/responses/ErrorResponse'
                 "501":
-                    $ref: '#/responses/errorResponse'
+                    $ref: '#/responses/ErrorResponse'
             tags:
                 - products
         put:
@@ -62,26 +107,31 @@ paths:
             operationId: updateProduct
             responses:
                 "201":
-                    $ref: '#/responses/noContentResponse'
+                    $ref: '#/responses/NoContentResponse'
                 "404":
-                    $ref: '#/responses/errorResponse'
+                    $ref: '#/responses/ErrorResponse'
                 "422":
-                    $ref: '#/responses/errorValidation'
+                    $ref: '#/responses/ErrorValidation'
             tags:
                 - products
 produces:
     - application/json
 responses:
-    errorResponse:
+    ErrorResponse:
         description: Generic Error message as string
-    errorValidation:
+        schema:
+            $ref: '#/definitions/GenericError'
+    ErrorValidation:
         description: Validation errors defined as array of string
-    noContentResponse:
+        schema:
+            $ref: '#/definitions/ValidationError'
+    NoContentResponse:
         description: ""
-    productsResponse:
+    ProductsResponse:
         description: A list of products
         schema:
-            items: {}
+            items:
+                $ref: '#/definitions/Products'
             type: array
 schemes:
     - http

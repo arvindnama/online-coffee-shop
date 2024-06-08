@@ -8,7 +8,8 @@ import (
 // swagger:route GET /products products listProducts
 // Returns a list of products
 // responses:
-//	200: productsResponse
+//	200: ProductsResponse
+//	404: ErrorResponse
 
 func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
 	p.l.Println("Handle GET products")
