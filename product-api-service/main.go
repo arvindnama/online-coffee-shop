@@ -1,13 +1,13 @@
 package main
 
 import (
-	"build-go-microservice/data"
-	"build-go-microservice/handlers"
 	"context"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"product-api-service/data"
+	"product-api-service/handlers"
 	"time"
 
 	"github.com/go-openapi/runtime/middleware"
@@ -25,7 +25,7 @@ func getEnv(key string, defaultValue string) string {
 
 func main() {
 
-	logger := log.New(os.Stdout, "product-api", log.LstdFlags)
+	logger := log.New(os.Stdout, "product-api-service", log.LstdFlags)
 	validation := data.NewValidation()
 
 	productsHandler := handlers.NewProducts(logger, validation)
