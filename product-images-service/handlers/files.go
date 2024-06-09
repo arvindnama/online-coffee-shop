@@ -4,8 +4,9 @@ import (
 	"io"
 	"net/http"
 	"path/filepath"
-	"product-images-service/files"
 	"strconv"
+
+	"github.com/arvindnama/golang-microservices/product-images-service/files"
 
 	"github.com/gorilla/mux"
 	"github.com/hashicorp/go-hclog"

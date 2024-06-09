@@ -1,4 +1,4 @@
-module product-images-service
+module github.com/arvindnama/golang-microservices/product-images-service
 
 go 1.22.3
 

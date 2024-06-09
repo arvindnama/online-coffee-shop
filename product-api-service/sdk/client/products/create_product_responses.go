@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
 
-	"product-api-service/sdk/models"
+	"github.com/arvindnama/golang-microservices/product-api-service/sdk/models"
 )
 
 // CreateProductReader is a Reader for the CreateProduct structure.

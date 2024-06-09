@@ -3,16 +3,16 @@ consumes:
     - application/json
 definitions:
     GenericError:
-        description: GenericError GenericError GenericError GenericError generic error
+        description: GenericError GenericError GenericError GenericError GenericError generic error
         properties:
             message:
                 description: message
                 type: string
                 x-go-name: Message
         type: object
-        x-go-package: product-api-service/sdk/models
+        x-go-package: github.com/arvindnama/golang-microservices/product-api-service/sdk/models
     Product:
-        description: Product Product defines the structure for an API products
+        description: Product defines the structure for an API products
         properties:
             description:
                 description: the description for this product
@@ -47,15 +47,15 @@ definitions:
             - price
             - sku
         type: object
-        x-go-package: product-api-service/sdk/models
+        x-go-package: github.com/arvindnama/golang-microservices/product-api-service/data
     Products:
-        description: Products Products Products Products products
+        description: Products Products Products Products Products products
         items:
             $ref: '#/definitions/Product'
         type: array
-        x-go-package: product-api-service/sdk/models
+        x-go-package: github.com/arvindnama/golang-microservices/product-api-service/sdk/models
     ValidationError:
-        description: ValidationError is a collection error messages
+        description: ValidationError ValidationError is a collection error messages
         properties:
             messages:
                 description: messages
@@ -64,7 +64,7 @@ definitions:
                 type: array
                 x-go-name: Messages
         type: object
-        x-go-package: product-api-service/handlers
+        x-go-package: github.com/arvindnama/golang-microservices/product-api-service/sdk/models
 info:
     description: Documentation for Product API
     title: of Product API

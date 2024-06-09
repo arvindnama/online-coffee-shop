@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
-	"product-api-service/sdk/client"
-	"product-api-service/sdk/client/products"
 	"testing"
+
+	"github.com/arvindnama/golang-microservices/github.com/arvindnama/golang-microservices/product-api-service/sdk/client/products"
+
+	"github.com/arvindnama/golang-microservices/github.com/arvindnama/golang-microservices/product-api-service/sdk/client"
 )
 
 func TestProductClient(t *testing.T) {

@@ -5,9 +5,11 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"product-images-service/files"
-	"product-images-service/handlers"
 	"time"
+
+	"github.com/arvindnama/golang-microservices/product-images-service/handlers"
+
+	"github.com/arvindnama/golang-microservices/product-images-service/files"
 
 	goHandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"

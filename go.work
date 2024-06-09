@@ -1,0 +1,7 @@
+go 1.22.3
+
+use ./currency-service
+
+use ./product-api-service
+
+use ./product-images-service
