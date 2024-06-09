@@ -8,8 +8,10 @@ import (
 	"os/signal"
 	"time"
 
+	currencyClient "github.com/arvindnama/golang-microservices/currency-service/protos"
 	"github.com/arvindnama/golang-microservices/product-api-service/data"
 	"github.com/arvindnama/golang-microservices/product-api-service/handlers"
+	"google.golang.org/grpc"
 
 	"github.com/go-openapi/runtime/middleware"
 	gorillaHandlers "github.com/gorilla/handlers"
@@ -29,7 +31,14 @@ func main() {
 	logger := log.New(os.Stdout, "product-api-service", log.LstdFlags)
 	validation := data.NewValidation()
 
-	productsHandler := handlers.NewProducts(logger, validation)
+	conn, err := grpc.Dial("localhost:9091", grpc.WithInsecure())
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close()
+	cc := currencyClient.NewCurrencyClient(conn)
+
+	productsHandler := handlers.NewProducts(logger, validation, cc)
 
 	serveMux := mux.NewRouter()
 	getRouter := serveMux.Methods("GET").Subrouter()

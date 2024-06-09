@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"context"
 	"net/http"
 
+	currencyClient "github.com/arvindnama/golang-microservices/currency-service/protos"
 	"github.com/arvindnama/golang-microservices/product-api-service/data"
 )
 
@@ -36,7 +38,6 @@ func (p *Products) GetProduct(rw http.ResponseWriter, r *http.Request) {
 
 	id := getProductID(r)
 	product, err := data.GetProductById(id)
-
 	if err != nil {
 		p.l.Println("[ERROR] fetching product", err)
 
@@ -51,10 +52,26 @@ func (p *Products) GetProduct(rw http.ResponseWriter, r *http.Request) {
 		}
 
 	}
+	rr := &currencyClient.RateRequest{
+		Base:        currencyClient.Currencies_EUR,
+		Destination: currencyClient.Currencies_GBP,
+	}
+
+	resp, err := p.cc.GetRate(context.Background(), rr)
+	if err != nil {
+		p.l.Println("[ERROR] Error getting currency rate")
+		data.ToJSON(&GenericError{Message: err.Error()}, rw)
+		return
+	}
+
+	p.l.Printf("CC resp %v\n", resp)
+	product.Price = product.Price * resp.Rate
+
 	err = data.ToJSON(product, rw)
 
 	if err != nil {
 		p.l.Println("[ERROR] serializing error")
+		data.ToJSON(&GenericError{Message: err.Error()}, rw)
 	}
 
 }
