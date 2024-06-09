@@ -5,15 +5,18 @@ import (
 
 	protos "github.com/arvindnama/golang-microservices/currency-service/protos"
 
+	"github.com/arvindnama/golang-microservices/currency-service/data"
+
 	"github.com/hashicorp/go-hclog"
 )
 
 type Currency struct {
 	logger hclog.Logger
+	er     *data.ExchangeRates
 }
 
-func NewCurrency(logger hclog.Logger) *Currency {
-	return &Currency{logger}
+func NewCurrency(logger hclog.Logger, er *data.ExchangeRates) *Currency {
+	return &Currency{logger, er}
 }
 
 func (c *Currency) GetRate(
@@ -28,7 +31,10 @@ func (c *Currency) GetRate(
 		"destination",
 		req.GetDestination(),
 	)
-
-	return &protos.RateResponse{Rate: 100.5}, nil
+	cr, err := c.er.GetRate(req.GetBase().String(), req.GetDestination().String())
+	if err != nil {
+		return nil, err
+	}
+	return &protos.RateResponse{Rate: cr}, nil
 
 }
