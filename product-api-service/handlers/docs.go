@@ -61,3 +61,11 @@ type ErrorValidationWrapper struct {
 	//in: body
 	Body ValidationError
 }
+
+//swagger:parameters listProducts listProduct
+type ProductQueryParameter struct {
+	// Currency
+	//in: query
+	//required: false
+	Currency string
+}

@@ -55,6 +55,33 @@ func (e *ExchangeRates) getRates() error {
 
 		e.rates[c.Currency] = r
 	}
+	e.rates["EUR"] = 1
 
 	return nil
+}
+
+func (e *ExchangeRates) GetRate(base string, dest string) (float64, error) {
+	br, err := e.getRateEuroAsBase(base)
+
+	if err != nil {
+		return 0, err
+	}
+
+	dr, err := e.getRateEuroAsBase(dest)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return br * dr, nil
+}
+
+func (e *ExchangeRates) getRateEuroAsBase(dest string) (float64, error) {
+	dr, ok := e.rates[dest]
+
+	if !ok {
+		return 0, fmt.Errorf("rate not found for currency %v", dest)
+	}
+
+	return dr, nil
 }

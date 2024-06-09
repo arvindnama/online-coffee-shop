@@ -1,31 +1,30 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 
-	currencyClient "github.com/arvindnama/golang-microservices/currency-service/protos"
 	"github.com/arvindnama/golang-microservices/product-api-service/data"
+	"github.com/hashicorp/go-hclog"
 
 	"github.com/gorilla/mux"
 )
 
 type Products struct {
-	l  *log.Logger
-	v  *data.Validation
-	cc currencyClient.CurrencyClient
+	l   hclog.Logger
+	v   *data.Validation
+	pDB *data.ProductsDB
 }
 
 type KeyProduct struct {
 }
 
 func NewProducts(
-	l *log.Logger,
+	l hclog.Logger,
 	v *data.Validation,
-	cc currencyClient.CurrencyClient,
+	pDB *data.ProductsDB,
 ) *Products {
-	return &Products{l, v, cc}
+	return &Products{l, v, pDB}
 }
 
 //swagger:model GenericError

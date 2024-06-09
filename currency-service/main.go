@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/arvindnama/golang-microservices/currency-service/data"
 	protos "github.com/arvindnama/golang-microservices/currency-service/protos"
 	"github.com/arvindnama/golang-microservices/currency-service/server"
 	"github.com/hashicorp/go-hclog"
@@ -20,7 +21,13 @@ func main() {
 
 	logger := hclog.Default()
 	gs := grpc.NewServer()
-	cs := server.NewCurrency(logger)
+	er, err := data.NewExchangeRates(logger)
+
+	if err != nil {
+		logger.Error("Unable to create exchange rate", err)
+		os.Exit(1)
+	}
+	cs := server.NewCurrency(logger, er)
 
 	protos.RegisterCurrencyServer(gs, cs)
 

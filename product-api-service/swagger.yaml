@@ -3,7 +3,7 @@ consumes:
     - application/json
 definitions:
     GenericError:
-        description: GenericError GenericError GenericError GenericError GenericError generic error
+        description: GenericError GenericError GenericError GenericError GenericError GenericError generic error
         properties:
             message:
                 description: message
@@ -12,7 +12,7 @@ definitions:
         type: object
         x-go-package: github.com/arvindnama/golang-microservices/product-api-service/sdk/models
     Product:
-        description: Product defines the structure for an API products
+        description: Product Product defines the structure for an API products
         properties:
             description:
                 description: the description for this product
@@ -47,15 +47,15 @@ definitions:
             - price
             - sku
         type: object
-        x-go-package: github.com/arvindnama/golang-microservices/product-api-service/data
+        x-go-package: github.com/arvindnama/golang-microservices/product-api-service/sdk/models
     Products:
-        description: Products Products Products Products Products products
+        description: Products Products Products Products Products Products products
         items:
             $ref: '#/definitions/Product'
         type: array
         x-go-package: github.com/arvindnama/golang-microservices/product-api-service/sdk/models
     ValidationError:
-        description: ValidationError ValidationError is a collection error messages
+        description: ValidationError ValidationError ValidationError is a collection error messages
         properties:
             messages:
                 description: messages
@@ -74,6 +74,11 @@ paths:
         get:
             description: Returns a list of products
             operationId: listProducts
+            parameters:
+                - description: Currency
+                  in: query
+                  name: Currency
+                  type: string
             responses:
                 "200":
                     $ref: '#/responses/ProductsResponse'
@@ -125,6 +130,10 @@ paths:
                   required: true
                   type: integer
                   x-go-name: ID
+                - description: Currency
+                  in: query
+                  name: Currency
+                  type: string
             responses:
                 "200":
                     $ref: '#/responses/ProductResponse'

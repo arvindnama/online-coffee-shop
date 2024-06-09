@@ -1,24 +1,33 @@
 package handlers
 
 import (
-	"context"
 	"net/http"
 
-	currencyClient "github.com/arvindnama/golang-microservices/currency-service/protos"
 	"github.com/arvindnama/golang-microservices/product-api-service/data"
 )
 
 // swagger:route GET /products products listProducts
 // Returns a list of products
 // responses:
+//
 //	200: ProductsResponse
 //	501: ErrorResponse
-
 func (p *Products) GetAllProducts(rw http.ResponseWriter, r *http.Request) {
-	p.l.Println("Handle GET products")
-	products := data.GetProducts()
+	p.l.Info("Handle GET products")
+
+	currency := r.URL.Query().Get("currency")
+
+	p.l.Debug("currency", currency)
+	products, err := p.pDB.GetProducts(currency)
+
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		data.ToJSON(&GenericError{Message: err.Error()}, rw)
+	}
+
 	rw.Header().Add("Content-Type", "application/json")
-	err := data.ToJSON(products, rw)
+	err = data.ToJSON(products, rw)
+
 	if err != nil {
 		http.Error(rw, "Unable to marshal produces", http.StatusInternalServerError)
 	}
@@ -33,13 +42,14 @@ func (p *Products) GetAllProducts(rw http.ResponseWriter, r *http.Request) {
 //	404: ErrorResponse
 //	501: ErrorResponse
 func (p *Products) GetProduct(rw http.ResponseWriter, r *http.Request) {
-	p.l.Println("Handle GET products")
+	p.l.Info("Handle GET products")
 	rw.Header().Add("Content-Type", "application/json")
 
+	currency := r.URL.Query().Get("currency")
 	id := getProductID(r)
-	product, err := data.GetProductById(id)
+	product, err := p.pDB.GetProductById(id, currency)
 	if err != nil {
-		p.l.Println("[ERROR] fetching product", err)
+		p.l.Error("[ERROR] fetching product", err)
 
 		switch err {
 		case data.ErrPrdNotFound:
@@ -52,25 +62,11 @@ func (p *Products) GetProduct(rw http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-	rr := &currencyClient.RateRequest{
-		Base:        currencyClient.Currencies_EUR,
-		Destination: currencyClient.Currencies_GBP,
-	}
-
-	resp, err := p.cc.GetRate(context.Background(), rr)
-	if err != nil {
-		p.l.Println("[ERROR] Error getting currency rate")
-		data.ToJSON(&GenericError{Message: err.Error()}, rw)
-		return
-	}
-
-	p.l.Printf("CC resp %v\n", resp)
-	product.Price = product.Price * resp.Rate
 
 	err = data.ToJSON(product, rw)
 
 	if err != nil {
-		p.l.Println("[ERROR] serializing error")
+		p.l.Error("[ERROR] serializing error")
 		data.ToJSON(&GenericError{Message: err.Error()}, rw)
 	}
 

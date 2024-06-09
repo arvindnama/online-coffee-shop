@@ -20,7 +20,7 @@ message RateRequest {
 }
 
 message RateResponse {
-    float Rate = 1;
+    double Rate = 1;
 }
 
 
