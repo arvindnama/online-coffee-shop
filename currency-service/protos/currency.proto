@@ -1,0 +1,24 @@
+//[learning]: proto file defines the service & message structure
+// This becomes an input to poto compile for generating server side interfaces & client side stubs
+// first line specified the compiler version.
+syntax = "proto3";
+
+option go_package="protos/currency";
+
+//[learning]: service: is the contract that client / server use to communicate.
+service Currency {
+    //[learning]: method : syntax: rpc <name_of_method>(<request_message>)r returns (<response_message>) { }
+
+    rpc GetRate(RateRequest) returns (RateResponse);
+}
+
+//[learning]: message: is the structure data that flows inside protocol buffer
+message RateRequest {
+    //[learning]: Field inside a message : <type> <nameOfField> = <location_in_msg>
+    string Base = 1;
+    string Destination = 2;
+}
+
+message RateResponse {
+    float Rate = 1;
+}
