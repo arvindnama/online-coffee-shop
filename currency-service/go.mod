@@ -1,4 +1,4 @@
-module currency-service
+module github.com/arvindnama/golang-microservices/currency-service
 
 go 1.22.3
 

@@ -1,13 +1,12 @@
 package main
 
 import (
-	"currency-service/server"
 	"net"
 	"os"
 	"os/signal"
 
-	protos "currency-service/protos"
-
+	protos "github.com/arvindnama/golang-microservices/currency-service/protos"
+	"github.com/arvindnama/golang-microservices/currency-service/server"
 	"github.com/hashicorp/go-hclog"
 	"github.com/nicholasjackson/env"
 	"google.golang.org/grpc"
