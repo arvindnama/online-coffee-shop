@@ -16,9 +16,9 @@ import (
 //	422: ErrorValidation
 //	501: ErrorResponse
 func (p *Products) AddProduct(rw http.ResponseWriter, r *http.Request) {
-	p.l.Println("Handle POST products")
+	p.l.Info("Handle POST products")
 
 	prod := r.Context().Value(KeyProduct{}).(*data.Product) // this is how we cast
 
-	data.AddProduct(prod)
+	p.pDB.AddProduct(prod)
 }

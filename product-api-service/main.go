@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -11,6 +10,7 @@ import (
 	currencyClient "github.com/arvindnama/golang-microservices/currency-service/protos"
 	"github.com/arvindnama/golang-microservices/product-api-service/data"
 	"github.com/arvindnama/golang-microservices/product-api-service/handlers"
+	"github.com/hashicorp/go-hclog"
 	"google.golang.org/grpc"
 
 	"github.com/go-openapi/runtime/middleware"
@@ -28,8 +28,12 @@ func getEnv(key string, defaultValue string) string {
 
 func main() {
 
-	logger := log.New(os.Stdout, "product-api-service", log.LstdFlags)
-	validation := data.NewValidation()
+	logger := hclog.New(&hclog.LoggerOptions{
+		Name:  "product-api-service",
+		Level: hclog.Debug,
+	})
+
+	stdLogger := logger.StandardLogger(&hclog.StandardLoggerOptions{InferLevels: true})
 
 	conn, err := grpc.Dial("localhost:9091", grpc.WithInsecure())
 	if err != nil {
@@ -38,11 +42,15 @@ func main() {
 	defer conn.Close()
 	cc := currencyClient.NewCurrencyClient(conn)
 
-	productsHandler := handlers.NewProducts(logger, validation, cc)
+	pDB := data.NewProductsDB(logger, cc)
+	validation := data.NewValidation()
+	productsHandler := handlers.NewProducts(logger, validation, pDB)
 
 	serveMux := mux.NewRouter()
 	getRouter := serveMux.Methods("GET").Subrouter()
+	getRouter.HandleFunc("/products", productsHandler.GetAllProducts).Queries("currency", "{[A-Z]{3}}")
 	getRouter.HandleFunc("/products", productsHandler.GetAllProducts)
+	getRouter.HandleFunc("/products/{id:[0-9]+}", productsHandler.GetProduct).Queries("currency", "{[A-Z]{3}}")
 	getRouter.HandleFunc("/products/{id:[0-9]+}", productsHandler.GetProduct)
 
 	putRouter := serveMux.Methods("PUT").Subrouter()
@@ -71,16 +79,17 @@ func main() {
 	server := &http.Server{
 		Addr:         bindAddress,
 		Handler:      corsHandler(serveMux),
+		ErrorLog:     stdLogger,
 		IdleTimeout:  120 * time.Second,
 		ReadTimeout:  1 * time.Second,
 		WriteTimeout: 1 * time.Second,
 	}
 
 	go func() {
-		logger.Printf("Starting Http Server at %v\n", bindAddress)
+		logger.Info("Starting Http Server at %#v\n", bindAddress)
 		err := server.ListenAndServe()
 		if err != nil {
-			logger.Fatal(err)
+			logger.Error("Error Starting Http Server", err)
 		}
 	}()
 
@@ -90,7 +99,7 @@ func main() {
 	signal.Notify(channel, os.Kill)
 
 	sig := <-channel
-	logger.Println("\nSignal received", sig)
+	logger.Info("\nSignal received", sig)
 
 	timeoutCtx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	server.Shutdown(timeoutCtx)

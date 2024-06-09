@@ -15,7 +15,7 @@ import (
 //	404: ErrorResponse
 //	422: ErrorValidation
 func (p *Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
-	p.l.Println("Handle Update product")
+	p.l.Info("Handle Update product")
 
 	id := getProductID(r)
 
@@ -24,14 +24,16 @@ func (p *Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
 	// [learning]: 2. <>.(<>) is the syntax for typecasting
 	prod := r.Context().Value(KeyProduct{}).(*data.Product)
 
-	err := data.UpdateProduct(id, prod)
+	err := p.pDB.UpdateProduct(id, prod)
 
 	if err == data.ErrPrdNotFound {
+		p.l.Error("Product not found", err)
 		http.Error(rw, "Product not found", http.StatusNotFound)
 		return
 	}
 
 	if err != nil {
+		p.l.Error("Product not found", err)
 		http.Error(rw, "Product not found", http.StatusInternalServerError)
 		return
 	}

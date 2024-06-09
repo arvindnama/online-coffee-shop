@@ -14,18 +14,20 @@ import (
 //	404: ErrorResponse
 //	501: ErrorResponse
 func (p *Products) DeleteProduct(rw http.ResponseWriter, r *http.Request) {
-	p.l.Println("Handle Delete product")
+	p.l.Info("Handle Delete product")
 
 	id := getProductID(r)
 
-	err := data.DeleteProduct(id)
+	err := p.pDB.DeleteProduct(id)
 
 	if err == data.ErrPrdNotFound {
+		p.l.Error("Product not found", err)
 		http.Error(rw, "Product not found", http.StatusNotFound)
 		return
 	}
 
 	if err != nil {
+		p.l.Error("Product not found", err)
 		http.Error(rw, "Product not found", http.StatusInternalServerError)
 		return
 	}
