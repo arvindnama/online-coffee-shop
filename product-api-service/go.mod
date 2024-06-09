@@ -1,4 +1,4 @@
-module product-api-service
+module github.com/arvindnama/golang-microservices/product-api-service
 
 go 1.22.3
 

@@ -6,9 +6,10 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"product-api-service/data"
-	"product-api-service/handlers"
 	"time"
+
+	"github.com/arvindnama/golang-microservices/product-api-service/data"
+	"github.com/arvindnama/golang-microservices/product-api-service/handlers"
 
 	"github.com/go-openapi/runtime/middleware"
 	gorillaHandlers "github.com/gorilla/handlers"

@@ -3,7 +3,8 @@ package handlers
 import (
 	"context"
 	"net/http"
-	"product-api-service/data"
+
+	"github.com/arvindnama/golang-microservices/product-api-service/data"
 )
 
 func (p *Products) MiddlewareValidateProduct(next http.Handler) http.Handler {
