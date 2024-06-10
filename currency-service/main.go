@@ -19,7 +19,10 @@ var bindAddress = env.String("BIND_ADDRESS", false, ":9091", "Bind address for t
 func main() {
 	env.Parse()
 
-	logger := hclog.Default()
+	logger := hclog.New(&hclog.LoggerOptions{
+		Name:  "Currency service",
+		Level: hclog.Debug,
+	})
 	gs := grpc.NewServer()
 	er, err := data.NewExchangeRates(logger)
 

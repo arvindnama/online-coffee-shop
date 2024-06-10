@@ -3,8 +3,10 @@ package data
 import (
 	"encoding/xml"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/hashicorp/go-hclog"
 )
@@ -84,4 +86,42 @@ func (e *ExchangeRates) getRateEuroAsBase(dest string) (float64, error) {
 	}
 
 	return dr, nil
+}
+
+// MonitorRates check the exchange server and updates the cache
+func (e *ExchangeRates) MonitorRates(interval time.Duration) chan struct{} {
+	res := make(chan struct{})
+
+	//[learning]: NewTicket is like setInterval
+	// it returns a channel and notifies the channel every intervalset
+	timer := time.NewTicker(interval)
+
+	go func() {
+		for {
+			//[learning]: Select is used to wait on channel (it does close the channel once done)
+			select {
+			case <-timer.C:
+				// randomize the rates.
+				for k, v := range e.rates {
+					// Change only 10% of value
+					change := (rand.Float64() / 10)
+
+					// + / - change
+
+					direction := rand.Intn(1)
+
+					if direction == 0 {
+						// reduce
+						change = 1 - change
+					} else {
+						// increase
+						change = 1 + change
+					}
+					e.rates[k] = v * change
+				}
+				res <- struct{}{}
+			}
+		}
+	}()
+	return res
 }

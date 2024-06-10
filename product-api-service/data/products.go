@@ -9,9 +9,11 @@ import (
 )
 
 type ProductsDB struct {
-	currencySvc protos.CurrencyClient
-	logger      hclog.Logger
-	products    []*Product
+	currencySvc   protos.CurrencyClient
+	logger        hclog.Logger
+	products      []*Product
+	rates         map[string]float64
+	subRateClient protos.Currency_SubscribeRatesClient
 }
 
 // Product defines the structure for an API products
@@ -69,11 +71,16 @@ var PRODUCTS_SEED_DATA = []*Product{
 }
 
 func NewProductsDB(logger hclog.Logger, currencySvc protos.CurrencyClient) *ProductsDB {
-	return &ProductsDB{
-		logger:      logger,
-		currencySvc: currencySvc,
-		products:    PRODUCTS_SEED_DATA,
+	pDB := &ProductsDB{
+		logger:        logger,
+		currencySvc:   currencySvc,
+		products:      PRODUCTS_SEED_DATA,
+		rates:         make(map[string]float64),
+		subRateClient: nil,
 	}
+
+	go pDB.handleRateUpdate()
+	return pDB
 }
 
 var ErrPrdNotFound = fmt.Errorf("product not found")
@@ -164,6 +171,11 @@ func (pDB *ProductsDB) getNextId() int {
 }
 
 func (pDB *ProductsDB) getRate(currency string) (float64, error) {
+
+	if cr, ok := pDB.rates[currency]; ok {
+		return cr, nil
+	}
+
 	req := &protos.RateRequest{
 		Base:        protos.Currencies_EUR,
 		Destination: protos.Currencies(protos.Currencies_value[currency]),
@@ -175,5 +187,37 @@ func (pDB *ProductsDB) getRate(currency string) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
+
+	// now subscribe to the rate change
+	pDB.subRateClient.SendMsg(req)
+
+	pDB.rates[currency] = resp.Rate
+
 	return resp.Rate, nil
+}
+
+func (pDb *ProductsDB) handleRateUpdate() {
+	sub, err := pDb.currencySvc.SubscribeRates(context.Background())
+
+	pDb.subRateClient = sub
+
+	if err != nil {
+		pDb.logger.Error("Unable to subscribe to CSvc")
+		return
+	}
+
+	for {
+		rateResp, err := sub.Recv()
+		if err != nil {
+			pDb.logger.Error("Error retrieving Rated from CSvc")
+			return
+		}
+		pDb.logger.Debug(
+			"New Rate received",
+			"base", rateResp.GetBase(),
+			"dest", rateResp.GetDestination(),
+			"new rate", rateResp.Rate,
+		)
+		pDb.rates[rateResp.Destination.String()] = rateResp.Rate
+	}
 }
