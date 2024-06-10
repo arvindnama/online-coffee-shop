@@ -229,17 +229,31 @@ func (pDb *ProductsDB) handleRateUpdate() {
 	}
 
 	for {
-		rateResp, err := sub.Recv()
-		if err != nil {
-			pDb.logger.Error("Error retrieving Rated from CSvc")
-			return
+		srr, err := sub.Recv()
+
+		if gerr := srr.GetError(); gerr != nil {
+			serr := status.FromProto(gerr)
+
+			if serr.Code() == codes.AlreadyExists {
+				pDb.logger.Error(
+					"Cannot subscribe to for rate updates more than once", "error", serr,
+				)
+			}
 		}
-		pDb.logger.Debug(
-			"New Rate received",
-			"base", rateResp.GetBase(),
-			"dest", rateResp.GetDestination(),
-			"new rate", rateResp.Rate,
-		)
-		pDb.rates[rateResp.Destination.String()] = rateResp.Rate
+
+		if streamingRateResp := srr.GetRateResponse(); streamingRateResp != nil {
+			if err != nil {
+				pDb.logger.Error("Error retrieving Rated from CSvc")
+				return
+			}
+
+			pDb.logger.Debug(
+				"New Rate received",
+				"base", streamingRateResp.GetBase(),
+				"dest", streamingRateResp.GetDestination(),
+				"new rate", streamingRateResp.Rate,
+			)
+			pDb.rates[streamingRateResp.Destination.String()] = streamingRateResp.Rate
+		}
 	}
 }
