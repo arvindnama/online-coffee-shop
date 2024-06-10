@@ -29,7 +29,7 @@ func getEnv(key string, defaultValue string) string {
 func main() {
 
 	logger := hclog.New(&hclog.LoggerOptions{
-		Name:  "product-api-service",
+		Name:  "Product Api Service",
 		Level: hclog.Debug,
 	})
 

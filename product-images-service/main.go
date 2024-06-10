@@ -25,7 +25,7 @@ func main() {
 	env.Parse()
 
 	logger := hclog.New(&hclog.LoggerOptions{
-		Name:  "product-images-service",
+		Name:  "Product Images Service",
 		Level: hclog.LevelFromString(*logLevel),
 	})
 
