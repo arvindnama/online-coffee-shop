@@ -6,6 +6,8 @@ import (
 
 	protos "github.com/arvindnama/golang-microservices/currency-service/protos"
 	"github.com/hashicorp/go-hclog"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type ProductsDB struct {
@@ -182,11 +184,31 @@ func (pDB *ProductsDB) getRate(currency string) (float64, error) {
 	}
 	resp, err := pDB.currencySvc.GetRate(context.Background(), req)
 
-	pDB.logger.Debug("gRPC currency client GetRate", "src", protos.Currencies_EUR, "dest", currency, "rate", resp.Rate)
-
 	if err != nil {
+		if s, ok := status.FromError(err); ok {
+			md := s.Details()[0].(*protos.RateRequest)
+			if s.Code() == codes.InvalidArgument {
+				return -1, fmt.Errorf(
+					"unable to get rate from currency server base: %s & dest: %s cannot be same",
+					md.Base.String(),
+					md.Destination.String(),
+				)
+			}
+			return -1, fmt.Errorf(
+				"unable to get rate from currency server base: %s , dest: %s",
+				md.Base.String(),
+				md.Destination.String(),
+			)
+		}
 		return 0, err
 	}
+
+	pDB.logger.Debug(
+		"gRPC currency client GetRate",
+		"src", protos.Currencies_EUR,
+		"dest", currency,
+		"rate", resp.Rate,
+	)
 
 	// now subscribe to the rate change
 	pDB.subRateClient.SendMsg(req)
