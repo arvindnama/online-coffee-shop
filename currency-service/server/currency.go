@@ -93,12 +93,16 @@ func (c *Currency) handleRateUpdates() {
 					"Sending an update to client", "base", request.GetBase(), "dest", request.GetDestination(), "new rate", rate,
 				)
 
-				err = sub.Send(&protos.RateResponse{
-					Base:        request.Base,
-					Destination: request.Destination,
-					Rate:        rate,
-				})
-
+				err = sub.Send(
+					&protos.StreamingRateResponse{
+						Message: &protos.StreamingRateResponse_RateResponse{
+							RateResponse: &protos.RateResponse{
+								Base:        request.Base,
+								Destination: request.Destination,
+								Rate:        rate,
+							},
+						},
+					})
 				if err != nil {
 					c.logger.Error(
 						"Unable to send msg to client rate for", "base", request.GetBase(), "dest", request.GetDestination(),
@@ -118,7 +122,7 @@ func (c *Currency) SubscribeRates(
 		//[learning]: when client closes the stream, err with io.EOF
 		if err == io.EOF {
 			c.logger.Info("client closed the connection")
-			return err
+			break
 		}
 
 		if err != nil {
@@ -136,6 +140,31 @@ func (c *Currency) SubscribeRates(
 			// [learning]: make cannot be used in create slice ?? (get more info)
 			sub = []*protos.RateRequest{}
 		}
+
+		var validationStatus *status.Status
+		// check for duplicate subscriptions
+		for _, req := range sub {
+			if rr.Base == req.Base && rr.Destination == req.Destination {
+				// duplicate subscriptions
+				validationStatus = status.Newf(
+					codes.AlreadyExists,
+					"Unable to subscribe as it already exists",
+				)
+
+				validationStatus, _ = validationStatus.WithDetails(rr)
+				break
+			}
+		}
+
+		if validationStatus != nil {
+			src.Send(&protos.StreamingRateResponse{
+				Message: &protos.StreamingRateResponse_Error{
+					Error: validationStatus.Proto(),
+				},
+			})
+			break
+		}
+
 		sub = append(sub, rr)
 		c.subs[src] = sub
 	}

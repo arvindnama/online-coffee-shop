@@ -5,12 +5,14 @@ syntax = "proto3";
 
 option go_package="protos/currency";
 
+import "google/rpc/status.proto";
+
 //[learning]: service: is the contract that client / server use to communicate.
 service Currency {
     //[learning]: method : syntax: rpc <name_of_method>(<request_message>)r returns (<response_message>) { }
 
     rpc GetRate(RateRequest) returns (RateResponse);
-    rpc SubscribeRates(stream RateRequest) returns (stream RateResponse);
+    rpc SubscribeRates(stream RateRequest) returns (stream StreamingRateResponse);
 }
 
 //[learning]: message: is the structure data that flows inside protocol buffer
@@ -24,6 +26,13 @@ message RateResponse {
     Currencies Base = 1;
     Currencies Destination = 2;
     double Rate = 3;
+}
+
+message StreamingRateResponse {
+    oneof message {
+        RateResponse rate_response = 1;
+        google.rpc.Status error = 2;
+    } 
 }
 
 
