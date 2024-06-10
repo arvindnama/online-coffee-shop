@@ -6,6 +6,8 @@ import (
 	"time"
 
 	protos "github.com/arvindnama/golang-microservices/currency-service/protos"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/arvindnama/golang-microservices/currency-service/data"
 
@@ -35,11 +37,27 @@ func (c *Currency) GetRate(
 
 	c.logger.Info(
 		"handle GetRate",
-		"base",
-		req.GetBase(),
-		"destination",
-		req.GetDestination(),
+		"base", req.GetBase(),
+		"destination", req.GetDestination(),
 	)
+
+	if req.Base == req.Destination {
+		status := status.Newf(
+			codes.InvalidArgument,
+			"Base currency %s cannot be same as destination %s",
+			req.GetBase().String(),
+			req.GetDestination().String(),
+		)
+		status, wde := status.WithDetails(req)
+
+		//[learning]: This rear code block, just being defensive
+		if wde != nil {
+			return nil, wde
+		}
+
+		return nil, status.Err()
+	}
+
 	cr, err := c.rates.GetRate(req.GetBase().String(), req.GetDestination().String())
 	if err != nil {
 		return nil, err
