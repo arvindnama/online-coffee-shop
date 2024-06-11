@@ -17,7 +17,7 @@ import (
 	"github.com/nicholasjackson/env"
 )
 
-var bindAddress = env.String("BIND_ADDRESS", false, ":9090", "Bind address for the service")
+var bindAddress = env.String("BIND_ADDRESS", false, ":9091", "Bind address for the service")
 var logLevel = env.String("LOG_LEVEL", false, "debug", "Log output level for the service [debug, info, trace]")
 var basePath = env.String("BASE_PATH", false, "./imagesstore", "Base path to store images")
 
