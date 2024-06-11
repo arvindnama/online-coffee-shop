@@ -14,7 +14,7 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-var bindAddress = env.String("BIND_ADDRESS", false, ":9091", "Bind address for the service")
+var bindAddress = env.String("BIND_ADDRESS", false, ":9092", "Bind address for the service")
 
 func main() {
 	env.Parse()

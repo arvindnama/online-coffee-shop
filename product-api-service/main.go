@@ -11,22 +11,20 @@ import (
 	"github.com/arvindnama/golang-microservices/product-api-service/data"
 	"github.com/arvindnama/golang-microservices/product-api-service/handlers"
 	"github.com/hashicorp/go-hclog"
+	"github.com/nicholasjackson/env"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/go-openapi/runtime/middleware"
 	gorillaHandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
-func getEnv(key string, defaultValue string) string {
-	envValue := os.Getenv(key)
-	if envValue == "" {
-		return defaultValue
-	}
-	return envValue
-}
+var bindAddress = env.String("BIND_ADDRESS", false, ":9090", "Bind address for the service")
+var currencyServiceAddress = env.String("CS_ADDRESS", false, "localhost:9092", "currency service address")
 
 func main() {
+	env.Parse()
 
 	logger := hclog.New(&hclog.LoggerOptions{
 		Name:  "Product Api Service",
@@ -35,7 +33,10 @@ func main() {
 
 	stdLogger := logger.StandardLogger(&hclog.StandardLoggerOptions{InferLevels: true})
 
-	conn, err := grpc.Dial("localhost:9091", grpc.WithInsecure())
+	conn, err := grpc.NewClient(
+		*currencyServiceAddress,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	if err != nil {
 		panic(err)
 	}
@@ -72,12 +73,11 @@ func main() {
 	getRouter.Handle("/swagger.yaml", http.FileServer(http.Dir("./")))
 
 	corsHandler := gorillaHandlers.CORS(
-		gorillaHandlers.AllowedOrigins([]string{"http://localhost:3000"}),
+		gorillaHandlers.AllowedOrigins([]string{"*"}),
 	)
 
-	bindAddress := getEnv("BIND_ADDRESS", ":9090")
 	server := &http.Server{
-		Addr:         bindAddress,
+		Addr:         *bindAddress,
 		Handler:      corsHandler(serveMux),
 		ErrorLog:     stdLogger,
 		IdleTimeout:  120 * time.Second,
@@ -86,7 +86,7 @@ func main() {
 	}
 
 	go func() {
-		logger.Info("Starting Http Server at %#v\n", bindAddress)
+		logger.Info("Starting Http Server at %#v\n", *bindAddress)
 		err := server.ListenAndServe()
 		if err != nil {
 			logger.Error("Error Starting Http Server", err)
