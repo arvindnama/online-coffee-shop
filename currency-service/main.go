@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net"
 	"os"
 	"os/signal"
@@ -42,7 +43,7 @@ func main() {
 
 	go func() {
 		reflection.Register(gs)
-		logger.Info("Starting server on port ", *bindAddress)
+		logger.Info(fmt.Sprintf("Starting server on port %#v", *bindAddress))
 		gs.Serve(lis)
 	}()
 

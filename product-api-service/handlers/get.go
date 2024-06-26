@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	dataUtils "github.com/arvindnama/golang-microservices/libs/utils/data-utils"
 	"github.com/arvindnama/golang-microservices/product-api-service/data"
 )
 
@@ -22,11 +23,11 @@ func (p *Products) GetAllProducts(rw http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
-		data.ToJSON(&GenericError{Message: err.Error()}, rw)
+		dataUtils.ToJSON(&GenericError{Message: err.Error()}, rw)
 	}
 
 	rw.Header().Add("Content-Type", "application/json")
-	err = data.ToJSON(products, rw)
+	err = dataUtils.ToJSON(products, rw)
 
 	if err != nil {
 		http.Error(rw, "Unable to marshal produces", http.StatusInternalServerError)
@@ -54,20 +55,20 @@ func (p *Products) GetProduct(rw http.ResponseWriter, r *http.Request) {
 		switch err {
 		case data.ErrPrdNotFound:
 			rw.WriteHeader(http.StatusNotFound)
-			data.ToJSON(&GenericError{Message: err.Error()}, rw)
+			dataUtils.ToJSON(&GenericError{Message: err.Error()}, rw)
 			return
 		default:
 			rw.WriteHeader(http.StatusInternalServerError)
-			data.ToJSON(&GenericError{Message: err.Error()}, rw)
+			dataUtils.ToJSON(&GenericError{Message: err.Error()}, rw)
 		}
 
 	}
 
-	err = data.ToJSON(product, rw)
+	err = dataUtils.ToJSON(product, rw)
 
 	if err != nil {
 		p.l.Error("[ERROR] serializing error")
-		data.ToJSON(&GenericError{Message: err.Error()}, rw)
+		dataUtils.ToJSON(&GenericError{Message: err.Error()}, rw)
 	}
 
 }

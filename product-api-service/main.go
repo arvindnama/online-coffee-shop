@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -86,7 +87,7 @@ func main() {
 	}
 
 	go func() {
-		logger.Info("Starting Http Server at %#v\n", *bindAddress)
+		logger.Info(fmt.Sprintf("Starting Http Server at %#v\n", *bindAddress))
 		err := server.ListenAndServe()
 		if err != nil {
 			logger.Error("Error Starting Http Server", err)
