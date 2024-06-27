@@ -4,9 +4,18 @@ import (
 	"fmt"
 )
 
+//swagger:model Product
 type Product struct {
-	ID        int64   `json:"id" validate:"required"`
-	Quantity  int64   `json:"quantity" validate:"required"`
+	// Identifier of the product in the order
+	//	require:true
+	ID int64 `json:"id" validate:"required"`
+
+	// quantity of products purchased
+	//	require:true
+	Quantity int64 `json:"quantity" validate:"required"`
+
+	// price of one product
+	//	require:true
 	UnitPrice float32 `json:"unitPrice" validate:"required"`
 }
 
@@ -19,12 +28,20 @@ const (
 	Completed  Status = "completed"
 )
 
+//swagger:model Order
 type Order struct {
-	ID         int64     `json:"id"`
-	Name       string    `json:"name" validate:"required"`
-	Products   []Product `json:"products" validate:"required"`
-	TotalPrice float64   `json:"totalPrice"`
-	Status     Status    `json:"status"`
+	// Identifier of the order
+	ID int64 `json:"id"`
+	// name of the order
+	// required: true
+	Name string `json:"name" validate:"required"`
+	// products purchased in the order
+	// required: true
+	Products []Product `json:"products" validate:"required"`
+	// total cost of the order
+	TotalPrice float64 `json:"totalPrice"`
+	// order status
+	Status Status `json:"status"`
 }
 
 type ValidationError struct {

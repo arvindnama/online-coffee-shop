@@ -5,6 +5,7 @@ import (
 
 	"github.com/arvindnama/golang-microservices/order-service/handler"
 	"github.com/arvindnama/golang-microservices/order-service/middleware"
+	openApiMiddleware "github.com/go-openapi/runtime/middleware"
 )
 
 func loadRoutes(
@@ -14,11 +15,26 @@ func loadRoutes(
 ) {
 
 	requestBodyMiddleware := middleware.CreateMiddlewareStack(
+		m.IsAuthenticated,
 		m.DeserializeRequestBody,
 		m.ValidateRequestBody,
 	)
+
+	requestBodyNoValidationMiddleware := middleware.CreateMiddlewareStack(
+		m.IsAuthenticated,
+		m.DeserializeRequestBody,
+	)
+
 	router.HandleFunc("GET /orders/{id}", h.GetOrder)
 	router.HandleFunc("GET /orders", h.GetAllOrders)
 	router.Handle("POST /orders", requestBodyMiddleware(http.HandlerFunc(h.CreateOrder)))
-	router.Handle("PATCH /orders/{id}", m.DeserializeRequestBody(http.HandlerFunc(h.PatchOrder)))
+	router.Handle("PATCH /orders/{id}", requestBodyNoValidationMiddleware(http.HandlerFunc(h.PatchOrder)))
+
+	// documentation
+
+	ops := openApiMiddleware.RedocOpts{SpecURL: "/swagger.yaml"}
+
+	redocGetDocHandler := openApiMiddleware.Redoc(ops, nil)
+	router.Handle("GET /docs", redocGetDocHandler)
+	router.Handle("GET /swagger.yaml", http.FileServer(http.Dir("./")))
 }

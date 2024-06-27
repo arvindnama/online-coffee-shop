@@ -1,0 +1,178 @@
+basePath: /
+consumes:
+    - application/json
+definitions:
+    Order:
+        description: Order Order order
+        properties:
+            id:
+                description: Identifier of the order
+                format: int64
+                type: integer
+                x-go-name: ID
+            name:
+                description: name of the order
+                type: string
+                x-go-name: Name
+            products:
+                description: products purchased in the order
+                items:
+                    $ref: '#/definitions/Product'
+                type: array
+                x-go-name: Products
+            status:
+                $ref: '#/definitions/Status'
+            totalPrice:
+                description: total cost of the order
+                format: double
+                type: number
+                x-go-name: TotalPrice
+        required:
+            - name
+            - products
+        type: object
+        x-go-package: github.com/arvindnama/golang-microservices/order-service/sdk/models
+    Product:
+        description: Product Product product
+        properties:
+            id:
+                description: |-
+                    Identifier of the product in the order
+                    require:true
+                format: int64
+                type: integer
+                x-go-name: ID
+            quantity:
+                description: |-
+                    quantity of products purchased
+                    require:true
+                format: int64
+                type: integer
+                x-go-name: Quantity
+            unitPrice:
+                description: |-
+                    price of one product
+                    require:true
+                format: float
+                type: number
+                x-go-name: UnitPrice
+        type: object
+        x-go-package: github.com/arvindnama/golang-microservices/order-service/sdk/models
+    Status:
+        description: Status Status status
+        type: string
+        x-go-package: github.com/arvindnama/golang-microservices/order-service/data
+    ValidationError:
+        description: ValidationError ValidationError validation error
+        properties:
+            messages:
+                description: messages
+                items:
+                    type: string
+                type: array
+                x-go-name: Messages
+        type: object
+        x-go-package: github.com/arvindnama/golang-microservices/order-service/sdk/models
+info:
+    description: |-
+        # Documentation for Order API
+
+        Schemes: Http
+    title: for Order API
+    version: 1.0.0
+paths:
+    /orders:
+        get:
+            description: Gets all the registered orders from the database
+            operationId: getAllOrders
+            responses:
+                "200":
+                    $ref: '#/responses/OrdersResponse'
+                "401":
+                    $ref: '#/responses/ErrorResponse'
+                "500":
+                    $ref: '#/responses/ErrorResponse'
+            tags:
+                - orders
+        post:
+            description: Creates an order
+            operationId: createOrder
+            parameters:
+                - description: A order in DB
+                  in: body
+                  name: Body
+                  schema:
+                    $ref: '#/definitions/Order'
+            responses:
+                "201":
+                    $ref: '#/responses/OrderResponse'
+                "401":
+                    $ref: '#/responses/ErrorResponse'
+                "500":
+                    $ref: '#/responses/ErrorResponse'
+            tags:
+                - orders
+    /orders/{id}:
+        get:
+            description: Gets the order with orderId from the database
+            operationId: getOrder
+            parameters:
+                - description: Id of the product
+                  format: int64
+                  in: path
+                  name: id
+                  required: true
+                  type: integer
+                  x-go-name: ID
+            responses:
+                "200":
+                    $ref: '#/responses/OrderResponse'
+                "401":
+                    $ref: '#/responses/ErrorResponse'
+                "500":
+                    $ref: '#/responses/ErrorResponse'
+            tags:
+                - orders
+        patch:
+            description: Updates the status of the Order
+            operationId: patchOrder
+            parameters:
+                - description: A order in DB
+                  in: body
+                  name: Body
+                  schema:
+                    $ref: '#/definitions/Order'
+                - description: Id of the product
+                  format: int64
+                  in: path
+                  name: id
+                  required: true
+                  type: integer
+                  x-go-name: ID
+            responses:
+                "201":
+                    $ref: '#/responses/OrderResponse'
+                "401":
+                    $ref: '#/responses/ErrorResponse'
+                "500":
+                    $ref: '#/responses/ErrorResponse'
+            tags:
+                - orders
+produces:
+    - application/json
+responses:
+    ErrorResponse:
+        description: ""
+        schema:
+            $ref: '#/definitions/ValidationError'
+    OrderResponse:
+        description: A orders
+        schema:
+            $ref: '#/definitions/Order'
+    OrdersResponse:
+        description: A list of orders
+        schema:
+            items:
+                $ref: '#/definitions/Order'
+            type: array
+swagger: "2.0"
