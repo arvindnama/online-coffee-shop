@@ -9,6 +9,7 @@ import (
 	"time"
 
 	currencyClient "github.com/arvindnama/golang-microservices/currency-service/protos"
+	dataUtils "github.com/arvindnama/golang-microservices/libs/utils/data-utils"
 	"github.com/arvindnama/golang-microservices/product-api-service/data"
 	"github.com/arvindnama/golang-microservices/product-api-service/handlers"
 	"github.com/hashicorp/go-hclog"
@@ -45,7 +46,13 @@ func main() {
 	cc := currencyClient.NewCurrencyClient(conn)
 
 	pDB := data.NewProductsDB(logger, cc)
-	validation := data.NewValidation()
+	cv := []*dataUtils.CustomValidator{
+		{
+			Field:     "sku",
+			Validator: data.ValidateSKU,
+		},
+	}
+	validation := dataUtils.NewValidation(cv)
 	productsHandler := handlers.NewProducts(logger, validation, pDB)
 
 	serveMux := mux.NewRouter()

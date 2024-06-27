@@ -3,8 +3,10 @@ package data
 import (
 	"context"
 	"fmt"
+	"regexp"
 
 	protos "github.com/arvindnama/golang-microservices/currency-service/protos"
+	"github.com/go-playground/validator/v10"
 	"github.com/hashicorp/go-hclog"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -256,4 +258,12 @@ func (pDb *ProductsDB) handleRateUpdate() {
 			pDb.rates[streamingRateResp.Destination.String()] = streamingRateResp.Rate
 		}
 	}
+}
+
+func ValidateSKU(fl validator.FieldLevel) bool {
+	// sku format: xxxx-xxxx-xxxx
+	re := regexp.MustCompile(`[a-z]+-[a-z]+-[a-z]+`)
+	matches := re.FindAllString(fl.Field().String(), -1)
+
+	return len(matches) == 1
 }
