@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
 	currencyClient "github.com/arvindnama/golang-microservices/currency-service/protos"
+	dataUtils "github.com/arvindnama/golang-microservices/libs/utils/data-utils"
 	"github.com/arvindnama/golang-microservices/product-api-service/data"
 	"github.com/arvindnama/golang-microservices/product-api-service/handlers"
 	"github.com/hashicorp/go-hclog"
@@ -44,7 +46,13 @@ func main() {
 	cc := currencyClient.NewCurrencyClient(conn)
 
 	pDB := data.NewProductsDB(logger, cc)
-	validation := data.NewValidation()
+	cv := []*dataUtils.CustomValidator{
+		{
+			Field:     "sku",
+			Validator: data.ValidateSKU,
+		},
+	}
+	validation := dataUtils.NewValidation(cv)
 	productsHandler := handlers.NewProducts(logger, validation, pDB)
 
 	serveMux := mux.NewRouter()
@@ -86,7 +94,7 @@ func main() {
 	}
 
 	go func() {
-		logger.Info("Starting Http Server at %#v\n", *bindAddress)
+		logger.Info(fmt.Sprintf("Starting Http Server at %#v\n", *bindAddress))
 		err := server.ListenAndServe()
 		if err != nil {
 			logger.Error("Error Starting Http Server", err)

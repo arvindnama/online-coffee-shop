@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	dataUtils "github.com/arvindnama/golang-microservices/libs/utils/data-utils"
 	"github.com/arvindnama/golang-microservices/product-api-service/data"
 	"github.com/hashicorp/go-hclog"
 
@@ -12,7 +13,7 @@ import (
 
 type Products struct {
 	l   hclog.Logger
-	v   *data.Validation
+	v   *dataUtils.Validation
 	pDB *data.ProductsDB
 }
 
@@ -21,7 +22,7 @@ type KeyProduct struct {
 
 func NewProducts(
 	l hclog.Logger,
-	v *data.Validation,
+	v *dataUtils.Validation,
 	pDB *data.ProductsDB,
 ) *Products {
 	return &Products{l, v, pDB}

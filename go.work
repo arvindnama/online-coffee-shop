@@ -1,7 +1,9 @@
 go 1.22.3
 
-use ./currency-service
-
-use ./product-api-service
-
-use ./product-images-service
+use (
+	./currency-service
+	./order-service
+	./product-images-service
+	./product-api-service
+	./libs/utils
+)

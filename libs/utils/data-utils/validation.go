@@ -1,11 +1,15 @@
-package data
+package dataUtils
 
 import (
 	"fmt"
-	"regexp"
 
 	"github.com/go-playground/validator/v10"
 )
+
+type CustomValidator struct {
+	Field     string
+	Validator validator.Func
+}
 
 // ValidationError is a Wrapper on top of FieldError
 type ValidationError struct {
@@ -41,9 +45,11 @@ type Validation struct {
 	validate *validator.Validate
 }
 
-func NewValidation() *Validation {
+func NewValidation(customValidators []*CustomValidator) *Validation {
 	validate := validator.New()
-	validate.RegisterValidation("sku", validateSKU)
+	for _, c := range customValidators {
+		validate.RegisterValidation(c.Field, c.Validator)
+	}
 	return &Validation{validate}
 }
 
@@ -63,12 +69,4 @@ func (v *Validation) Validate(i interface{}) ValidationErrors {
 		returnErrs = append(returnErrs, ve)
 	}
 	return returnErrs
-}
-
-func validateSKU(fl validator.FieldLevel) bool {
-	// sku format: xxxx-xxxx-xxxx
-	re := regexp.MustCompile(`[a-z]+-[a-z]+-[a-z]+`)
-	matches := re.FindAllString(fl.Field().String(), -1)
-
-	return len(matches) == 1
 }
