@@ -4,13 +4,13 @@ type LocalOrderStore struct {
 	orders []*Order
 }
 
-func NewLocalOrderStore() OrderDatabase {
-	return LocalOrderStore{
+func NewLocalOrderStore() *LocalOrderStore {
+	return &LocalOrderStore{
 		orders: []*Order{},
 	}
 }
 
-func (store LocalOrderStore) GetAllOrders() ([]*Order, error) {
+func (store *LocalOrderStore) GetAllOrders() ([]*Order, error) {
 	orders := []*Order{}
 	for _, o := range store.orders {
 		clonedOrder := *o
@@ -19,7 +19,7 @@ func (store LocalOrderStore) GetAllOrders() ([]*Order, error) {
 	return orders, nil
 }
 
-func (store LocalOrderStore) GetOrder(id int64) (*Order, error) {
+func (store *LocalOrderStore) GetOrder(id int64) (*Order, error) {
 	idx, err := store.findOrder(id)
 
 	if idx != -1 {
@@ -28,7 +28,7 @@ func (store LocalOrderStore) GetOrder(id int64) (*Order, error) {
 	return nil, err
 }
 
-func (store LocalOrderStore) nextOrderId() int64 {
+func (store *LocalOrderStore) nextOrderId() int64 {
 	orderLen := len(store.orders)
 	if orderLen == 0 {
 		return 1
@@ -37,7 +37,7 @@ func (store LocalOrderStore) nextOrderId() int64 {
 	return lo.ID + 1
 }
 
-func (store LocalOrderStore) UpdateOrderStatus(id int64, newStatus Status) error {
+func (store *LocalOrderStore) UpdateOrderStatus(id int64, newStatus Status) error {
 	idx, err := store.findOrder(id)
 
 	if err != nil {
@@ -47,7 +47,7 @@ func (store LocalOrderStore) UpdateOrderStatus(id int64, newStatus Status) error
 	return nil
 }
 
-func (store LocalOrderStore) DeleteOrder(id int64) error {
+func (store *LocalOrderStore) DeleteOrder(id int64) error {
 	idx, err := store.findOrder(id)
 
 	if err != nil {
@@ -57,13 +57,13 @@ func (store LocalOrderStore) DeleteOrder(id int64) error {
 	return nil
 }
 
-func (store LocalOrderStore) AddOrder(order *Order) (int64, error) {
+func (store *LocalOrderStore) AddOrder(order *Order) (int64, error) {
 	order.ID = store.nextOrderId()
 	store.orders = append(store.orders, order)
 	return order.ID, nil
 }
 
-func (store LocalOrderStore) findOrder(id int64) (int, error) {
+func (store *LocalOrderStore) findOrder(id int64) (int, error) {
 	for idx, o := range store.orders {
 		if o.ID == id {
 			return idx, nil
