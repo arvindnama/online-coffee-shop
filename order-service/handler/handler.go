@@ -64,7 +64,7 @@ func (o *OrderHandler) PatchOrder(w http.ResponseWriter, r *http.Request) {
 	order := r.Context().Value(middleware.RequestBody{}).(data.Order)
 	fmt.Println(order)
 
-	data.UpdateOrder(int64(orderId), &order)
+	data.UpdateOrderStatus(int64(orderId), order.Status)
 
 	updatedOrder, err := data.GetOrder(int64(orderId))
 	writeError(w, err)
