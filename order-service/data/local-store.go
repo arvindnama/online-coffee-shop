@@ -1,68 +1,70 @@
 package data
 
-type OrderDB struct {
+type LocalOrderStore struct {
 	orders []*Order
 }
 
-var orderDB = &OrderDB{
-	orders: []*Order{},
+func NewLocalOrderStore() OrderDatabase {
+	return LocalOrderStore{
+		orders: []*Order{},
+	}
 }
 
-func GetAllOrders() []*Order {
+func (store LocalOrderStore) GetAllOrders() ([]*Order, error) {
 	orders := []*Order{}
-	for _, o := range orderDB.orders {
+	for _, o := range store.orders {
 		clonedOrder := *o
 		orders = append(orders, &clonedOrder)
 	}
-	return orders
+	return orders, nil
 }
 
-func GetOrder(id int64) (*Order, error) {
-	idx, err := findOrder(id)
+func (store LocalOrderStore) GetOrder(id int64) (*Order, error) {
+	idx, err := store.findOrder(id)
 
 	if idx != -1 {
-		return orderDB.orders[idx], nil
+		return store.orders[idx], nil
 	}
 	return nil, err
 }
 
-func nextOrderId() int64 {
-	orderLen := len(orderDB.orders)
+func (store LocalOrderStore) nextOrderId() int64 {
+	orderLen := len(store.orders)
 	if orderLen == 0 {
 		return 1
 	}
-	lo := orderDB.orders[orderLen-1]
+	lo := store.orders[orderLen-1]
 	return lo.ID + 1
 }
 
-func UpdateOrderStatus(id int64, newStatus Status) error {
-	idx, err := findOrder(id)
+func (store LocalOrderStore) UpdateOrderStatus(id int64, newStatus Status) error {
+	idx, err := store.findOrder(id)
 
 	if err != nil {
 		return err
 	}
-	orderDB.orders[idx].Status = newStatus
+	store.orders[idx].Status = newStatus
 	return nil
 }
 
-func DeleteOrder(order *Order) error {
-	idx, err := findOrder(order.ID)
+func (store LocalOrderStore) DeleteOrder(id int64) error {
+	idx, err := store.findOrder(id)
 
 	if err != nil {
 		return err
 	}
-	orderDB.orders = append(orderDB.orders[:idx], orderDB.orders[idx+1])
+	store.orders = append(store.orders[:idx], store.orders[idx+1])
 	return nil
 }
 
-func AddOrder(order *Order) int64 {
-	order.ID = nextOrderId()
-	orderDB.orders = append(orderDB.orders, order)
-	return order.ID
+func (store LocalOrderStore) AddOrder(order *Order) (int64, error) {
+	order.ID = store.nextOrderId()
+	store.orders = append(store.orders, order)
+	return order.ID, nil
 }
 
-func findOrder(id int64) (int, error) {
-	for idx, o := range orderDB.orders {
+func (store LocalOrderStore) findOrder(id int64) (int, error) {
+	for idx, o := range store.orders {
 		if o.ID == id {
 			return idx, nil
 		}

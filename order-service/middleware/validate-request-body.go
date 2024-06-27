@@ -24,6 +24,7 @@ func (m *Middleware) ValidateRequestBody(next http.Handler) http.Handler {
 					Messages: errs.Errors(),
 				}, w,
 			)
+			return
 		}
 		next.ServeHTTP(w, r)
 	})

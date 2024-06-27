@@ -13,10 +13,12 @@ import (
 
 type OrderHandler struct {
 	logger hclog.Logger
+	store  data.OrderDatabase
 }
 
 func NewOrderHandler(logger hclog.Logger) *OrderHandler {
-	return &OrderHandler{logger}
+	store := data.NewOrderStore()
+	return &OrderHandler{logger, store}
 }
 
 func (o *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
@@ -24,12 +26,13 @@ func (o *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 
 	order := r.Context().Value(middleware.RequestBody{}).(data.Order)
 	order.Status = data.Initiated
-	orderId := data.AddOrder(&order)
+	orderId, err := o.store.AddOrder(&order)
+	writeError(w, err)
 
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Add("Content-Type", "application/json")
 
-	addedOrder, err := data.GetOrder(orderId)
+	addedOrder, err := o.store.GetOrder(orderId)
 	writeError(w, err)
 	err = dataUtils.ToJSON(addedOrder, w)
 	writeError(w, err)
@@ -39,8 +42,8 @@ func (o *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 func (o *OrderHandler) GetAllOrders(w http.ResponseWriter, r *http.Request) {
 	o.logger.Debug("handling Get All orders")
 
-	orders := data.GetAllOrders()
-
+	orders, err := o.store.GetAllOrders()
+	writeError(w, err)
 	w.WriteHeader(http.StatusOK)
 	dataUtils.ToJSON(&orders, w)
 }
@@ -50,7 +53,7 @@ func (o *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 	writeError(w, err)
 	o.logger.Debug(fmt.Sprintf("handling Get order %#v", orderId))
 
-	order, err := data.GetOrder(int64(orderId))
+	order, err := o.store.GetOrder(int64(orderId))
 	writeError(w, err)
 
 	dataUtils.ToJSON(order, w)
@@ -64,9 +67,9 @@ func (o *OrderHandler) PatchOrder(w http.ResponseWriter, r *http.Request) {
 	order := r.Context().Value(middleware.RequestBody{}).(data.Order)
 	fmt.Println(order)
 
-	data.UpdateOrderStatus(int64(orderId), order.Status)
-
-	updatedOrder, err := data.GetOrder(int64(orderId))
+	err = o.store.UpdateOrderStatus(int64(orderId), order.Status)
+	writeError(w, err)
+	updatedOrder, err := o.store.GetOrder(int64(orderId))
 	writeError(w, err)
 	dataUtils.ToJSON(updatedOrder, w)
 }
