@@ -28,16 +28,17 @@ func TestOrderClient(t *testing.T) {
 	client := orders.NewClientWithBearerToken("localhost:9093", "/", "http", "YW5hbWE=")
 	params := orders.NewCreateOrderParams().WithBody(order)
 
-	client.CreateOrder(params)
-	// _, err := client.CreateOrder(params)
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
+	orderCreated, err := client.CreateOrder(params)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fmt.Printf("created order %#v\n", orderCreated)
 
 	allOrders, err := client.GetAllOrders(orders.NewGetAllOrdersParams())
 
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Printf("%#v\n", allOrders)
+	fmt.Printf("all orders %#v\n", allOrders)
 }

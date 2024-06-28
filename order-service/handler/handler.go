@@ -31,6 +31,8 @@ func NewOrderHandler(logger hclog.Logger) *OrderHandler {
 func (o *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	o.logger.Debug("handling create order")
 
+	w.Header().Add("Content-Type", "application/json")
+
 	order := r.Context().Value(middleware.RequestBody{}).(data.Order)
 	order.Status = data.Initiated
 	orderId, err := o.store.AddOrder(&order)
@@ -45,7 +47,6 @@ func (o *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	w.Header().Add("Content-Type", "application/json")
 	err = dataUtils.ToJSON(addedOrder, w)
 
 	if o.writeError(w, err); err != nil {
@@ -62,13 +63,11 @@ func (o *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 // 500: ErrorResponse
 func (o *OrderHandler) GetAllOrders(w http.ResponseWriter, r *http.Request) {
 	o.logger.Debug("handling Get All orders")
-
+	w.Header().Add("Content-Type", "application/json")
 	orders, err := o.store.GetAllOrders()
 	if o.writeError(w, err); err != nil {
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	w.Header().Add("Content-Type", "application/json")
 	dataUtils.ToJSON(&orders, w)
 }
 
@@ -81,6 +80,7 @@ func (o *OrderHandler) GetAllOrders(w http.ResponseWriter, r *http.Request) {
 // 500: ErrorResponse
 func (o *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 	orderId, err := strconv.Atoi(r.PathValue("id"))
+	w.Header().Add("Content-Type", "application/json")
 	if o.writeError(w, err); err != nil {
 		return
 	}
@@ -91,8 +91,6 @@ func (o *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Header().Add("Content-Type", "application/json")
 	dataUtils.ToJSON(order, w)
 }
 
@@ -105,11 +103,13 @@ func (o *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 // 500: ErrorResponse
 func (o *OrderHandler) PatchOrder(w http.ResponseWriter, r *http.Request) {
 	orderId, err := strconv.Atoi(r.PathValue("id"))
-	o.writeError(w, err)
+	w.Header().Add("Content-Type", "application/json")
+	if o.writeError(w, err); err != nil {
+		return
+	}
 	o.logger.Debug(fmt.Sprintf("handling PATCH order %#v", orderId))
 
 	order := r.Context().Value(middleware.RequestBody{}).(data.Order)
-	fmt.Println(order)
 
 	err = o.store.UpdateOrderStatus(int64(orderId), order.Status)
 	if o.writeError(w, err); err != nil {
@@ -120,8 +120,6 @@ func (o *OrderHandler) PatchOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Header().Add("Content-Type", "application/json")
 	dataUtils.ToJSON(updatedOrder, w)
 }
 
