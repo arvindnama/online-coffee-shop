@@ -10,6 +10,7 @@ import (
 
 	dataUtils "github.com/arvindnama/golang-microservices/libs/utils/data-utils"
 	"github.com/arvindnama/golang-microservices/order-service/config"
+	"github.com/arvindnama/golang-microservices/order-service/data"
 	"github.com/arvindnama/golang-microservices/order-service/handler"
 	"github.com/arvindnama/golang-microservices/order-service/middleware"
 	"github.com/hashicorp/go-hclog"
@@ -21,11 +22,19 @@ func main() {
 		Name:  "Order Api Service",
 		Level: hclog.LevelFromString(config.Env.LogLevel),
 	})
+
+	logger.Trace(fmt.Sprintf("Loaded config %#v\n", config.Env))
 	stdLogger := logger.StandardLogger(&hclog.StandardLoggerOptions{InferLevels: true})
 
+	store, err := data.NewOrderStore(logger)
+
+	if err != nil {
+		logger.Error("Unable to connect to DB", err.Error())
+		panic(err)
+	}
 	v := dataUtils.NewValidation(nil)
 	m := middleware.NewMiddleware(logger, v)
-	h := handler.NewOrderHandler(logger)
+	h := handler.NewOrderHandler(logger, store)
 
 	router := http.NewServeMux()
 

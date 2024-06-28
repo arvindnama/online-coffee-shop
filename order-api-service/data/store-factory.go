@@ -1,5 +1,10 @@
 package data
 
+import (
+	"github.com/arvindnama/golang-microservices/order-service/config"
+	"github.com/hashicorp/go-hclog"
+)
+
 type OrderDatabase interface {
 	GetAllOrders() ([]*Order, error)
 	AddOrder(order *Order) (int64, error)
@@ -8,6 +13,10 @@ type OrderDatabase interface {
 	DeleteOrder(id int64) error
 }
 
-func NewOrderStore() OrderDatabase {
-	return NewLocalOrderStore()
+func NewOrderStore(logger hclog.Logger) (OrderDatabase, error) {
+
+	if config.Env.UseDB {
+		return NewDBOrderStore(logger)
+	}
+	return NewLocalOrderStore(logger)
 }

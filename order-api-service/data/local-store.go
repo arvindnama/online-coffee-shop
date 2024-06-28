@@ -1,13 +1,16 @@
 package data
 
+import "github.com/hashicorp/go-hclog"
+
 type LocalOrderStore struct {
 	orders []*Order
 }
 
-func NewLocalOrderStore() *LocalOrderStore {
+func NewLocalOrderStore(logger hclog.Logger) (*LocalOrderStore, error) {
+	logger.Debug("localDB: Connected successfully")
 	return &LocalOrderStore{
 		orders: []*Order{},
-	}
+	}, nil
 }
 
 func (store *LocalOrderStore) GetAllOrders() ([]*Order, error) {
