@@ -1,6 +1,10 @@
 package data
 
-import "github.com/hashicorp/go-hclog"
+import (
+	"context"
+
+	"github.com/hashicorp/go-hclog"
+)
 
 type LocalOrderStore struct {
 	orders []*Order
@@ -40,7 +44,11 @@ func (store *LocalOrderStore) nextOrderId() int64 {
 	return lo.ID + 1
 }
 
-func (store *LocalOrderStore) UpdateOrderStatus(id int64, newStatus Status) error {
+func (store *LocalOrderStore) UpdateOrderStatus(
+	ctx context.Context,
+	id int64,
+	newStatus Status,
+) error {
 	idx, err := store.findOrder(id)
 
 	if err != nil {
@@ -50,7 +58,7 @@ func (store *LocalOrderStore) UpdateOrderStatus(id int64, newStatus Status) erro
 	return nil
 }
 
-func (store *LocalOrderStore) DeleteOrder(id int64) error {
+func (store *LocalOrderStore) DeleteOrder(ctx context.Context, id int64) error {
 	idx, err := store.findOrder(id)
 
 	if err != nil {
@@ -60,7 +68,7 @@ func (store *LocalOrderStore) DeleteOrder(id int64) error {
 	return nil
 }
 
-func (store *LocalOrderStore) AddOrder(order *Order) (int64, error) {
+func (store *LocalOrderStore) AddOrder(ctx context.Context, order *Order) (int64, error) {
 	order.ID = store.nextOrderId()
 	store.orders = append(store.orders, order)
 	return order.ID, nil

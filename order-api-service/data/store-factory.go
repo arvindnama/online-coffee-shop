@@ -1,16 +1,18 @@
 package data
 
 import (
+	"context"
+
 	"github.com/arvindnama/golang-microservices/order-service/config"
 	"github.com/hashicorp/go-hclog"
 )
 
 type OrderDatabase interface {
 	GetAllOrders() ([]*Order, error)
-	AddOrder(order *Order) (int64, error)
+	AddOrder(ctx context.Context, order *Order) (int64, error)
 	GetOrder(id int64) (*Order, error)
-	UpdateOrderStatus(id int64, status Status) error
-	DeleteOrder(id int64) error
+	UpdateOrderStatus(ctx context.Context, id int64, status Status) error
+	DeleteOrder(ctx context.Context, id int64) error
 }
 
 func NewOrderStore(logger hclog.Logger) (OrderDatabase, error) {
