@@ -16,8 +16,7 @@ type OrderHandler struct {
 	store  data.OrderDatabase
 }
 
-func NewOrderHandler(logger hclog.Logger) *OrderHandler {
-	store := data.NewOrderStore()
+func NewOrderHandler(logger hclog.Logger, store data.OrderDatabase) *OrderHandler {
 	return &OrderHandler{logger, store}
 }
 
