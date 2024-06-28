@@ -34,7 +34,7 @@ func (o *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 
 	order := r.Context().Value(middleware.RequestBody{}).(data.Order)
 	order.Status = data.Initiated
-	orderId, err := o.store.AddOrder(&order)
+	orderId, err := o.store.AddOrder(r.Context(), &order)
 
 	if o.writeError(w, err); err != nil {
 		return
@@ -110,7 +110,7 @@ func (o *OrderHandler) PatchOrder(w http.ResponseWriter, r *http.Request) {
 
 	order := r.Context().Value(middleware.RequestBody{}).(data.Order)
 
-	err = o.store.UpdateOrderStatus(int64(orderId), order.Status)
+	err = o.store.UpdateOrderStatus(r.Context(), int64(orderId), order.Status)
 	if o.writeError(w, err); err != nil {
 		return
 	}

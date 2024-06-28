@@ -37,7 +37,7 @@ type Order struct {
 	Name string `json:"name" validate:"required"`
 	// products purchased in the order
 	// required: true
-	Products []Product `json:"products" validate:"required"`
+	Products []*Product `json:"products" validate:"required"`
 	// total cost of the order
 	TotalPrice float64 `json:"totalPrice"`
 	// order status
