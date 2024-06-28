@@ -6,23 +6,20 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/arvindnama/golang-microservices/currency-service/config"
 	"github.com/arvindnama/golang-microservices/currency-service/data"
 	protos "github.com/arvindnama/golang-microservices/currency-service/protos"
 	"github.com/arvindnama/golang-microservices/currency-service/server"
 	"github.com/hashicorp/go-hclog"
-	"github.com/nicholasjackson/env"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
-var bindAddress = env.String("BIND_ADDRESS", false, ":9092", "Bind address for the service")
-
 func main() {
-	env.Parse()
 
 	logger := hclog.New(&hclog.LoggerOptions{
 		Name:  "Currency service",
-		Level: hclog.Debug,
+		Level: hclog.LevelFromString(config.Env.LogLevel),
 	})
 	gs := grpc.NewServer()
 	er, err := data.NewExchangeRates(logger)
@@ -35,7 +32,8 @@ func main() {
 
 	protos.RegisterCurrencyServer(gs, cs)
 
-	lis, err := net.Listen("tcp", *bindAddress)
+	bindAddress := config.Env.Address
+	lis, err := net.Listen("tcp", bindAddress)
 	if err != nil {
 		logger.Error("Unable to listen", err)
 		os.Exit(1)
@@ -43,7 +41,7 @@ func main() {
 
 	go func() {
 		reflection.Register(gs)
-		logger.Info(fmt.Sprintf("Starting server on port %#v", *bindAddress))
+		logger.Info(fmt.Sprintf("Starting server on port %#v", bindAddress))
 		gs.Serve(lis)
 	}()
 
