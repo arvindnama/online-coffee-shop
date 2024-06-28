@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/arvindnama/golang-microservices/product-images-service/config"
 	"github.com/arvindnama/golang-microservices/product-images-service/handlers"
 
 	"github.com/arvindnama/golang-microservices/product-images-service/files"
@@ -14,24 +15,18 @@ import (
 	goHandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	hclog "github.com/hashicorp/go-hclog"
-	"github.com/nicholasjackson/env"
 )
 
-var bindAddress = env.String("BIND_ADDRESS", false, ":9091", "Bind address for the service")
-var logLevel = env.String("LOG_LEVEL", false, "debug", "Log output level for the service [debug, info, trace]")
-var basePath = env.String("BASE_PATH", false, "./imagesstore", "Base path to store images")
-
 func main() {
-	env.Parse()
 
 	logger := hclog.New(&hclog.LoggerOptions{
 		Name:  "Product Images Service",
-		Level: hclog.LevelFromString(*logLevel),
+		Level: hclog.LevelFromString(config.Env.LogLevel),
 	})
 
 	stgLogger := logger.StandardLogger(&hclog.StandardLoggerOptions{InferLevels: true})
 
-	localStorage, err := files.NewLocalStorage(*basePath, 1024*1000*5)
+	localStorage, err := files.NewLocalStorage(config.Env.ImagePath, 1024*1000*5)
 
 	filesHandler := handlers.NewFilesHandler(logger, localStorage)
 
@@ -62,11 +57,12 @@ func main() {
 	getRouter.Use(gm.GzipMiddleware)
 	getRouter.Handle(
 		"/images/{id:[0-9]+}/{filename:[a-zA-Z]+.[a-z]{3}}",
-		http.StripPrefix("/images/", http.FileServer(http.Dir(*basePath))),
+		http.StripPrefix("/images/", http.FileServer(http.Dir(config.Env.ImagePath))),
 	)
 
+	bindAddress := config.Env.Address
 	server := http.Server{
-		Addr:         *bindAddress,
+		Addr:         bindAddress,
 		Handler:      corsHandler(serverMux),
 		ErrorLog:     stgLogger,
 		ReadTimeout:  5 * time.Second,
@@ -75,7 +71,7 @@ func main() {
 	}
 
 	go func() {
-		logger.Info("Starting server", "bind_address", *bindAddress)
+		logger.Info("Starting server", "bind_address", bindAddress)
 		err := server.ListenAndServe()
 		if err != nil {
 			logger.Error("Unable to start server", err)

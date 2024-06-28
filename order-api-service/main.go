@@ -9,20 +9,17 @@ import (
 	"time"
 
 	dataUtils "github.com/arvindnama/golang-microservices/libs/utils/data-utils"
+	"github.com/arvindnama/golang-microservices/order-service/config"
 	"github.com/arvindnama/golang-microservices/order-service/handler"
 	"github.com/arvindnama/golang-microservices/order-service/middleware"
 	"github.com/hashicorp/go-hclog"
-	"github.com/nicholasjackson/env"
 )
 
-var bindAddress = env.String("BIND_ADDRESS", false, ":9093", "Bind address for the service")
-
 func main() {
-	env.Parse()
 
 	logger := hclog.New(&hclog.LoggerOptions{
 		Name:  "Order Api Service",
-		Level: hclog.Debug,
+		Level: hclog.LevelFromString(config.Env.LogLevel),
 	})
 	stdLogger := logger.StandardLogger(&hclog.StandardLoggerOptions{InferLevels: true})
 
@@ -38,14 +35,15 @@ func main() {
 		m.Logging,
 		m.AllowCors,
 	)
+	bindAddress := config.Env.Address
 	server := &http.Server{
-		Addr:     *bindAddress,
+		Addr:     bindAddress,
 		Handler:  stack(router),
 		ErrorLog: stdLogger,
 	}
 	go func() {
 
-		logger.Info(fmt.Sprintf("Starting Http Server at %v\n", *bindAddress))
+		logger.Info(fmt.Sprintf("Starting Http Server at %v\n", bindAddress))
 		err := server.ListenAndServe()
 		if err != nil {
 			logger.Error("Error Starting Http Server", err)
