@@ -10,7 +10,7 @@ import (
 
 type DBOrderStore struct {
 	logger hclog.Logger
-	db     *sql.DB
+	DB     *sql.DB
 }
 
 func NewDBOrderStore(logger hclog.Logger) (*DBOrderStore, error) {

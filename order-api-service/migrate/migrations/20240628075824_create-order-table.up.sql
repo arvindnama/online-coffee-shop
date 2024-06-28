@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS orders (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(225) NOT NULL,
+    `totalPrice` FLOAT NOT NULL, 
+    `status` VARCHAR(35) NOT NULL,
+
+    PRIMARY KEY(id)
+);
