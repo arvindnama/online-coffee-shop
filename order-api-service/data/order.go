@@ -10,6 +10,10 @@ type Product struct {
 	//	require:true
 	ID int64 `json:"id" validate:"required"`
 
+	// name of the product
+	// required: true
+	Name string `json:"name" validate:"required"`
+
 	// quantity of products purchased
 	//	require:true
 	Quantity int64 `json:"quantity" validate:"required"`

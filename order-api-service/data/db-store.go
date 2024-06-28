@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/arvindnama/golang-microservices/order-service/config"
 	"github.com/go-sql-driver/mysql"
@@ -90,17 +91,99 @@ func (store *DBOrderStore) GetOrder(id int64) (*Order, error) {
 }
 
 func (store *DBOrderStore) UpdateOrderStatus(ctx context.Context, id int64, newStatus Status) error {
+	fail := func(err error) error {
+		return fmt.Errorf("update order status %v", err)
+	}
+
+	tx, err := store.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return fail(err)
+	}
+
+	// defer rollback
+	defer tx.Rollback()
+
+	updateStatement := "Update orders SET status = ? where id=?"
+	if _, err := tx.ExecContext(ctx, updateStatement, newStatus, id); err != nil {
+		return fail(err)
+	}
+
+	if err = tx.Commit(); err != nil {
+		return fail(err)
+	}
 	return nil
 }
 
 func (store *DBOrderStore) DeleteOrder(ctx context.Context, id int64) error {
+
+	fail := func(err error) error {
+		return fmt.Errorf("Delete order status %v", err)
+	}
+
+	tx, err := store.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return fail(err)
+	}
+
+	defer tx.Rollback()
+
+	// First delete all products in the order
+	deleteProductsInOrderSQLCmd := "DELETE FROM products where order_id=?"
+	if _, err = tx.ExecContext(ctx, deleteProductsInOrderSQLCmd, id); err != nil {
+		return fail(err)
+	}
+
+	// Second delete the order
+	deleteOrderSQLCmd := "DELETE FROM orders where id=?"
+	if _, err = tx.ExecContext(ctx, deleteOrderSQLCmd, id); err != nil {
+		return fail(err)
+	}
+
 	return nil
 }
 
 func (store *DBOrderStore) AddOrder(ctx context.Context, order *Order) (int64, error) {
-	// insertIntoOrdersTableStatement := "INSERT INTO orders (name,totalPrice, status) VALUES (?,?,?);"
-	// _, err := store.DB.BeginTx()
-	return -1, nil
+
+	fail := func(err error) (int64, error) {
+		return 0, fmt.Errorf("Create Order: %v", err)
+	}
+
+	tx, err := store.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return fail(err)
+	}
+
+	// Defer a rollback in case anything fails.
+	// [learning]:: defer transaction rollback now will call rollback when function exits
+	// incase the transaction commit was successful, this rollback operation will result in a no-op
+	// in case the transaction fails or commit is not called rollback will be executed.
+	defer tx.Rollback()
+
+	insertIntoOrdersTable := "INSERT INTO orders (name, totalPrice, tx.ExecContext) VALUES(?,?,?)"
+	result, err := tx.ExecContext(ctx, insertIntoOrdersTable, order.Name, Initiated, order.TotalPrice)
+	if err != nil {
+		return fail(err)
+	}
+
+	// get the last inserted id from order table
+	orderID, err := result.LastInsertId()
+	if err != nil {
+		return fail(err)
+	}
+
+	for _, prod := range order.Products {
+		insertIntoProductsTable := "INSERT INTO products (id, order_id, name, quantity, unit_price) VALUES(?,?,?,?, ?)"
+		if _, err := tx.ExecContext(ctx, insertIntoProductsTable, prod.ID, orderID, prod.Name, prod.Quantity, prod.UnitPrice); err != nil {
+			return fail(err)
+		}
+	}
+
+	// Commit the transaction.
+	if err = tx.Commit(); err != nil {
+		return fail(err)
+	}
+
+	return orderID, nil
 }
 
 func scanAllOrdersRow(rows *sql.Rows, orders []*Order) ([]*Order, error) {
