@@ -37,7 +37,6 @@ func main() {
 	stack := middleware.CreateMiddlewareStack(
 		m.Logging,
 		m.AllowCors,
-		m.IsAuthenticated,
 	)
 	server := &http.Server{
 		Addr:     *bindAddress,

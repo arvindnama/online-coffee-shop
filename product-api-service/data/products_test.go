@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	dataUtils "github.com/arvindnama/golang-microservices/libs/utils/data-utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,7 +14,7 @@ func TestProductMissingNameReturnsErr(t *testing.T) {
 		Price: 19,
 		SKU:   "abc-abc-def",
 	}
-	v := NewValidation()
+	v := dataUtils.NewValidation(nil)
 	err := v.Validate(p)
 	fmt.Println(err.Errors())
 	assert.Len(t, err, 1)
@@ -27,7 +28,7 @@ func TestProductMissingPriceReturnsErr(t *testing.T) {
 		SKU:  "abc-cdf-ghi",
 	}
 
-	v := NewValidation()
+	v := dataUtils.NewValidation(nil)
 	err := v.Validate(p)
 	assert.Len(t, err, 1)
 }
@@ -40,6 +41,6 @@ func TestProductsToJSON(t *testing.T) {
 	}
 
 	b := bytes.NewBufferString("")
-	err := ToJSON(ps, b)
+	err := dataUtils.ToJSON(ps, b)
 	assert.NoError(t, err)
 }
