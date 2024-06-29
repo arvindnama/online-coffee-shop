@@ -7,13 +7,12 @@ CREATE TABLE IF NOT EXISTS orders (
     PRIMARY KEY(id)
 );
 
-CREATE TABLE IF NOT EXISTS products(
+CREATE TABLE IF NOT EXISTS products_in_order (
     `id` INT UNSIGNED NOT NULL,
     `order_id` INT UNSIGNED NOT NULL,
     `name` VARCHAR(225) NOT NULL,
     `quantity` INT NOT NULL,
     `unit_price` FLOAT NOT NULL,
 
-    PRIMARY KEY(id),
     FOREIGN KEY(order_id) REFERENCES orders(id)
 );
