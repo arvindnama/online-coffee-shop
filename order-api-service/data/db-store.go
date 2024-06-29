@@ -5,8 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/arvindnama/golang-microservices/order-service/config"
-	"github.com/go-sql-driver/mysql"
+	dbUtils "github.com/arvindnama/golang-microservices/libs/utils/db-utils"
 	"github.com/hashicorp/go-hclog"
 )
 
@@ -26,36 +25,8 @@ const (
 )
 
 func NewDBOrderStore(logger hclog.Logger) (*DBOrderStore, error) {
-	cfg := mysql.Config{
-		User:                 config.Env.DBUserName,
-		Passwd:               config.Env.DBPassword,
-		Addr:                 config.Env.DBAddress,
-		DBName:               config.Env.DBName,
-		Net:                  "tcp",
-		AllowNativePasswords: true,
-		ParseTime:            true,
-		MultiStatements:      true,
-	}
-	db, err := sql.Open("mysql", cfg.FormatDSN())
-	if err != nil {
-		return nil, err
-	}
-
-	err = initDb(db, logger)
-	if err != nil {
-		return nil, err
-	}
-
-	return &DBOrderStore{logger, db}, nil
-}
-
-func initDb(db *sql.DB, logger hclog.Logger) error {
-	err := db.Ping()
-	if err != nil {
-		return err
-	}
-	logger.Debug("DB: Successfully connected")
-	return nil
+	db, err := dbUtils.NewDbConnection(logger)
+	return &DBOrderStore{logger, db}, err
 }
 
 func (store *DBOrderStore) GetAllOrders() ([]*Order, error) {
