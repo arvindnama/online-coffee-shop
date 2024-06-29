@@ -24,6 +24,7 @@ func main() {
 	})
 
 	logger.Trace(fmt.Sprintf("Loaded config %#v\n", config.Env))
+
 	stdLogger := logger.StandardLogger(&hclog.StandardLoggerOptions{InferLevels: true})
 
 	store, err := data.NewOrderStore(logger)
