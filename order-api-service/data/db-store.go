@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	dbUtils "github.com/arvindnama/golang-microservices/libs/utils/db-utils"
+	"github.com/arvindnama/golang-microservices/order-service/config"
 	"github.com/hashicorp/go-hclog"
 )
 
@@ -25,7 +26,7 @@ const (
 )
 
 func NewDBOrderStore(logger hclog.Logger) (*DBOrderStore, error) {
-	db, err := dbUtils.NewDbConnection(logger)
+	db, err := dbUtils.NewDbConnection(&config.Env.DBConfig, logger)
 	return &DBOrderStore{logger, db}, err
 }
 
