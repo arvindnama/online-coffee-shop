@@ -15,6 +15,16 @@ type DBOrderStore struct {
 	DB     *sql.DB
 }
 
+const (
+	GET_ALL_ORDERS_SQL           = "SELECT * FROM orders JOIN products_in_order on orders.id = products_in_order.order_id"
+	GET_ORDER_BY_ID_SQL          = "SELECT * FROM orders JOIN products_in_order on orders.id = products_in_order.order_id WHERE orders.id=?"
+	UPDATE_ORDER_STATUS_SQL      = "Update orders SET status = ? where id=?"
+	DELETE_PRODUCTS_IN_ORDER_SQL = "DELETE FROM products_in_order where order_id=?"
+	DELETE_PRODUCT_SQL           = "DELETE FROM orders where id=?"
+	INSERT_ORDER_SQL             = "INSERT INTO orders (name, status, totalPrice) VALUES(?,?,?)"
+	INSERT_PRODUCT_IN_ORDER_SQL  = "INSERT INTO products_in_order (id, order_id, name, quantity, unit_price) VALUES(?,?,?,?, ?)"
+)
+
 func NewDBOrderStore(logger hclog.Logger) (*DBOrderStore, error) {
 	cfg := mysql.Config{
 		User:                 config.Env.DBUserName,
@@ -49,8 +59,7 @@ func initDb(db *sql.DB, logger hclog.Logger) error {
 }
 
 func (store *DBOrderStore) GetAllOrders() ([]*Order, error) {
-	sqlStatement := "SELECT * FROM orders JOIN products on orders.id = products.order_id"
-	rows, err := store.DB.Query(sqlStatement)
+	rows, err := store.DB.Query(GET_ALL_ORDERS_SQL)
 
 	if err != nil {
 		return nil, err
@@ -68,8 +77,7 @@ func (store *DBOrderStore) GetAllOrders() ([]*Order, error) {
 }
 
 func (store *DBOrderStore) GetOrder(id int64) (*Order, error) {
-	sqlStatement := "SELECT * FROM orders JOIN products on orders.id = products.order_id WHERE orders.id=?"
-	rows, err := store.DB.Query(sqlStatement, id)
+	rows, err := store.DB.Query(GET_ORDER_BY_ID_SQL, id)
 
 	if err != nil {
 		return nil, err
@@ -103,8 +111,7 @@ func (store *DBOrderStore) UpdateOrderStatus(ctx context.Context, id int64, newS
 	// defer rollback
 	defer tx.Rollback()
 
-	updateStatement := "Update orders SET status = ? where id=?"
-	if _, err := tx.ExecContext(ctx, updateStatement, newStatus, id); err != nil {
+	if _, err := tx.ExecContext(ctx, UPDATE_ORDER_STATUS_SQL, newStatus, id); err != nil {
 		return fail(err)
 	}
 
@@ -117,7 +124,7 @@ func (store *DBOrderStore) UpdateOrderStatus(ctx context.Context, id int64, newS
 func (store *DBOrderStore) DeleteOrder(ctx context.Context, id int64) error {
 
 	fail := func(err error) error {
-		return fmt.Errorf("Delete order status %v", err)
+		return fmt.Errorf("delete order status %v", err)
 	}
 
 	tx, err := store.DB.BeginTx(ctx, nil)
@@ -128,14 +135,12 @@ func (store *DBOrderStore) DeleteOrder(ctx context.Context, id int64) error {
 	defer tx.Rollback()
 
 	// First delete all products in the order
-	deleteProductsInOrderSQLCmd := "DELETE FROM products where order_id=?"
-	if _, err = tx.ExecContext(ctx, deleteProductsInOrderSQLCmd, id); err != nil {
+	if _, err = tx.ExecContext(ctx, DELETE_PRODUCTS_IN_ORDER_SQL, id); err != nil {
 		return fail(err)
 	}
 
 	// Second delete the order
-	deleteOrderSQLCmd := "DELETE FROM orders where id=?"
-	if _, err = tx.ExecContext(ctx, deleteOrderSQLCmd, id); err != nil {
+	if _, err = tx.ExecContext(ctx, DELETE_PRODUCT_SQL, id); err != nil {
 		return fail(err)
 	}
 
@@ -145,7 +150,7 @@ func (store *DBOrderStore) DeleteOrder(ctx context.Context, id int64) error {
 func (store *DBOrderStore) AddOrder(ctx context.Context, order *Order) (int64, error) {
 
 	fail := func(err error) (int64, error) {
-		return 0, fmt.Errorf("Create Order: %v", err)
+		return 0, fmt.Errorf("create Order: %v", err)
 	}
 
 	tx, err := store.DB.BeginTx(ctx, nil)
@@ -159,8 +164,7 @@ func (store *DBOrderStore) AddOrder(ctx context.Context, order *Order) (int64, e
 	// in case the transaction fails or commit is not called rollback will be executed.
 	defer tx.Rollback()
 
-	insertIntoOrdersTable := "INSERT INTO orders (name, totalPrice, tx.ExecContext) VALUES(?,?,?)"
-	result, err := tx.ExecContext(ctx, insertIntoOrdersTable, order.Name, Initiated, order.TotalPrice)
+	result, err := tx.ExecContext(ctx, INSERT_ORDER_SQL, order.Name, Initiated, order.TotalPrice)
 	if err != nil {
 		return fail(err)
 	}
@@ -172,8 +176,8 @@ func (store *DBOrderStore) AddOrder(ctx context.Context, order *Order) (int64, e
 	}
 
 	for _, prod := range order.Products {
-		insertIntoProductsTable := "INSERT INTO products (id, order_id, name, quantity, unit_price) VALUES(?,?,?,?, ?)"
-		if _, err := tx.ExecContext(ctx, insertIntoProductsTable, prod.ID, orderID, prod.Name, prod.Quantity, prod.UnitPrice); err != nil {
+		fmt.Printf("Product: %#v\n", prod)
+		if _, err := tx.ExecContext(ctx, INSERT_PRODUCT_IN_ORDER_SQL, prod.ID, orderID, prod.Name, prod.Quantity, prod.UnitPrice); err != nil {
 			return fail(err)
 		}
 	}
@@ -189,7 +193,6 @@ func (store *DBOrderStore) AddOrder(ctx context.Context, order *Order) (int64, e
 func scanAllOrdersRow(rows *sql.Rows, orders []*Order) ([]*Order, error) {
 	var orderId int
 	var orderName string
-	var pName string
 	var totalPrice float32
 	var status Status
 
@@ -202,7 +205,7 @@ func scanAllOrdersRow(rows *sql.Rows, orders []*Order) ([]*Order, error) {
 		&status,
 		&product.ID,
 		&orderId,
-		&pName,
+		&product.Name,
 		&product.Quantity,
 		&product.UnitPrice,
 	)
