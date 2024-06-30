@@ -15,7 +15,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// Order Order Order order
+// Order order
 //
 // swagger:model Order
 type Order struct {

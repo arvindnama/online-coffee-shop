@@ -18,7 +18,9 @@ type DBOrderStore struct {
 const (
 	GET_ALL_ORDERS_SQL = `
 		SELECT orders.id, orders.name,  orders.total_price, orders.status, products.id, products.name, products.quantity, products.unit_price
-		FROM orders 
+		FROM (
+			SELECT * FROM orders LIMIT ?, ?
+		) as orders 
 		JOIN products on orders.id = products.order_id
 	`
 	GET_ORDER_BY_ID_SQL = `
@@ -46,7 +48,7 @@ const (
 	`
 	INSERT_PRODUCT_IN_ORDER_SQL = `
 		INSERT INTO 
-		products_in_order (id, order_id, name, quantity, unit_price) 
+		products (id, order_id, name, quantity, unit_price) 
 		VALUES(?,?,?,?, ?)
 	`
 )
@@ -56,22 +58,29 @@ func NewDBOrderStore(logger hclog.Logger) (*DBOrderStore, error) {
 	return &DBOrderStore{logger, db}, err
 }
 
-func (store *DBOrderStore) GetAllOrders() ([]*Order, error) {
-	rows, err := store.DB.Query(GET_ALL_ORDERS_SQL)
+func (store *DBOrderStore) GetAllOrders(pageNo, pageSize int) ([]*Order, bool, error) {
+	// adding one more to the pageSize to evaluate if there is more elements in DB
+	// if sql query return `pageSize + 1` entries then there
+	// is at-least one more elements present in the db ( in the next page)
+	limit := pageSize + 1
+	offset := (pageNo - 1) * pageSize
+
+	store.logger.Debug("requested limit", limit, "offset", offset)
+	rows, err := store.DB.Query(GET_ALL_ORDERS_SQL, offset, limit)
 
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	var orders = []*Order{}
 	for rows.Next() {
 		orders, err = scanAllOrdersRow(rows, orders)
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 	}
-
-	return orders, nil
+	hasMore := len(orders) == pageSize+1
+	return orders, hasMore, nil
 }
 
 func (store *DBOrderStore) GetOrder(id int64) (*Order, error) {

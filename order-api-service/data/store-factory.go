@@ -8,7 +8,7 @@ import (
 )
 
 type OrderDatabase interface {
-	GetAllOrders() ([]*Order, error)
+	GetAllOrders(pageNo, pageSize int) ([]*Order, bool, error)
 	AddOrder(ctx context.Context, order *Order) (int64, error)
 	GetOrder(id int64) (*Order, error)
 	UpdateOrderStatus(ctx context.Context, id int64, status Status) error

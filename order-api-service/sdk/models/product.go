@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// Product Product Product product
+// Product product
 //
 // swagger:model Product
 type Product struct {
@@ -20,6 +20,10 @@ type Product struct {
 	// Identifier of the product in the order
 	// require:true
 	ID int64 `json:"id,omitempty"`
+
+	// name of the product
+	// require:true
+	Name string `json:"name,omitempty"`
 
 	// quantity of products purchased
 	// require:true
