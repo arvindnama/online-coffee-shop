@@ -17,13 +17,13 @@ func NewLocalOrderStore(logger hclog.Logger) (*LocalOrderStore, error) {
 	}, nil
 }
 
-func (store *LocalOrderStore) GetAllOrders() ([]*Order, error) {
+func (store *LocalOrderStore) GetAllOrders(pageNo, pageSize int) ([]*Order, bool, error) {
 	orders := []*Order{}
 	for _, o := range store.orders {
 		clonedOrder := *o
 		orders = append(orders, &clonedOrder)
 	}
-	return orders, nil
+	return orders, false, nil
 }
 
 func (store *LocalOrderStore) GetOrder(id int64) (*Order, error) {

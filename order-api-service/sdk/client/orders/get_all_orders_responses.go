@@ -58,7 +58,7 @@ GetAllOrdersOK describes a response with status code 200, with default header va
 A list of orders
 */
 type GetAllOrdersOK struct {
-	Payload []*models.Order
+	Payload *models.OrderPaginated
 }
 
 // IsSuccess returns true when this get all orders o k response has a 2xx status code
@@ -101,14 +101,16 @@ func (o *GetAllOrdersOK) String() string {
 	return fmt.Sprintf("[GET /orders][%d] getAllOrdersOK %s", 200, payload)
 }
 
-func (o *GetAllOrdersOK) GetPayload() []*models.Order {
+func (o *GetAllOrdersOK) GetPayload() *models.OrderPaginated {
 	return o.Payload
 }
 
 func (o *GetAllOrdersOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
+	o.Payload = new(models.OrderPaginated)
+
 	// response payload
-	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 

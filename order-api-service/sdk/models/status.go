@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// Status Status Status status
+// Status Status Status Status status
 //
 // swagger:model Status
 type Status string

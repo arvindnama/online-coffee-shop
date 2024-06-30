@@ -3,7 +3,6 @@ consumes:
     - application/json
 definitions:
     Order:
-        description: Order Order order
         properties:
             id:
                 description: Identifier of the order
@@ -31,9 +30,28 @@ definitions:
             - name
             - products
         type: object
-        x-go-package: github.com/arvindnama/golang-microservices/order-service/sdk/models
+        x-go-package: github.com/arvindnama/golang-microservices/order-service/data
+    OrderPaginated:
+        properties:
+            content:
+                items:
+                    $ref: '#/definitions/Order'
+                type: array
+                x-go-name: Content
+            hasMore:
+                type: boolean
+                x-go-name: HasMore
+            pageNo:
+                format: int64
+                type: integer
+                x-go-name: PageNo
+            pageSize:
+                format: int64
+                type: integer
+                x-go-name: PageSize
+        type: object
+        x-go-package: github.com/arvindnama/golang-microservices/order-service/data
     Product:
-        description: Product Product product
         properties:
             id:
                 description: |-
@@ -42,6 +60,12 @@ definitions:
                 format: int64
                 type: integer
                 x-go-name: ID
+            name:
+                description: |-
+                    name of the product
+                    require:true
+                type: string
+                x-go-name: Name
             quantity:
                 description: |-
                     quantity of products purchased
@@ -57,13 +81,13 @@ definitions:
                 type: number
                 x-go-name: UnitPrice
         type: object
-        x-go-package: github.com/arvindnama/golang-microservices/order-service/sdk/models
+        x-go-package: github.com/arvindnama/golang-microservices/order-service/data
     Status:
-        description: Status Status status
+        description: Status Status Status status
         type: string
         x-go-package: github.com/arvindnama/golang-microservices/order-service/data
     ValidationError:
-        description: ValidationError ValidationError validation error
+        description: ValidationError ValidationError ValidationError validation error
         properties:
             messages:
                 description: messages
@@ -85,6 +109,19 @@ paths:
         get:
             description: Gets all the registered orders from the database
             operationId: getAllOrders
+            parameters:
+                - description: Page size
+                  format: int64
+                  in: query
+                  name: page_size
+                  type: integer
+                  x-go-name: PageSize
+                - description: Page No.
+                  format: int64
+                  in: query
+                  name: page_no
+                  type: integer
+                  x-go-name: PageNo
             responses:
                 "200":
                     $ref: '#/responses/OrdersResponse'
@@ -172,7 +209,5 @@ responses:
     OrdersResponse:
         description: A list of orders
         schema:
-            items:
-                $ref: '#/definitions/Order'
-            type: array
+            $ref: '#/definitions/OrderPaginated'
 swagger: "2.0"

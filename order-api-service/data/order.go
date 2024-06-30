@@ -11,7 +11,7 @@ type Product struct {
 	ID int64 `json:"id" validate:"required"`
 
 	// name of the product
-	// required: true
+	// require:true
 	Name string `json:"name" validate:"required"`
 
 	// quantity of products purchased
@@ -46,6 +46,13 @@ type Order struct {
 	TotalPrice float64 `json:"totalPrice"`
 	// order status
 	Status Status `json:"status"`
+}
+
+type OrderPaginated struct {
+	Content  []*Order `json:"content"`
+	PageNo   int      `json:"pageNo"`
+	PageSize int      `json:"pageSize"`
+	HasMore  bool     `json:"hasMore"`
 }
 
 type ValidationError struct {

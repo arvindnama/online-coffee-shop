@@ -63,11 +63,28 @@ func (o *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 func (o *OrderHandler) GetAllOrders(w http.ResponseWriter, r *http.Request) {
 	o.logger.Debug("handling Get All orders")
 	w.Header().Add("Content-Type", "application/json")
-	orders, err := o.store.GetAllOrders()
+	pageNo, err := strconv.Atoi(r.URL.Query().Get("page_no"))
+	if err != nil {
+		pageNo = 1
+	}
+	pageSize, err := strconv.Atoi(r.URL.Query().Get("page_size"))
+	if err != nil {
+		pageSize = 10
+	}
+
+	o.logger.Debug("PageSize", pageSize, "pageno", pageNo)
+	orders, hasMore, err := o.store.GetAllOrders(pageNo, pageSize)
 	if o.writeError(w, err); err != nil {
 		return
 	}
-	dataUtils.ToJSON(&orders, w)
+
+	ordersPaginated := &data.OrderPaginated{
+		Content:  orders,
+		PageNo:   pageNo,
+		PageSize: pageSize,
+		HasMore:  hasMore,
+	}
+	dataUtils.ToJSON(&ordersPaginated, w)
 }
 
 // swagger:route GET /orders/{id} orders getOrder

@@ -14,6 +14,7 @@ import (
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
 )
 
 // NewGetAllOrdersParams creates a new GetAllOrdersParams object,
@@ -60,6 +61,23 @@ GetAllOrdersParams contains all the parameters to send to the API endpoint
 	Typically these are written to a http.Request.
 */
 type GetAllOrdersParams struct {
+
+	/* PageNo.
+
+	   Page No.
+
+	   Format: int64
+	*/
+	PageNo *int64
+
+	/* PageSize.
+
+	   Page size
+
+	   Format: int64
+	*/
+	PageSize *int64
+
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
@@ -113,6 +131,28 @@ func (o *GetAllOrdersParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithPageNo adds the pageNo to the get all orders params
+func (o *GetAllOrdersParams) WithPageNo(pageNo *int64) *GetAllOrdersParams {
+	o.SetPageNo(pageNo)
+	return o
+}
+
+// SetPageNo adds the pageNo to the get all orders params
+func (o *GetAllOrdersParams) SetPageNo(pageNo *int64) {
+	o.PageNo = pageNo
+}
+
+// WithPageSize adds the pageSize to the get all orders params
+func (o *GetAllOrdersParams) WithPageSize(pageSize *int64) *GetAllOrdersParams {
+	o.SetPageSize(pageSize)
+	return o
+}
+
+// SetPageSize adds the pageSize to the get all orders params
+func (o *GetAllOrdersParams) SetPageSize(pageSize *int64) {
+	o.PageSize = pageSize
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *GetAllOrdersParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -120,6 +160,40 @@ func (o *GetAllOrdersParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 		return err
 	}
 	var res []error
+
+	if o.PageNo != nil {
+
+		// query param page_no
+		var qrPageNo int64
+
+		if o.PageNo != nil {
+			qrPageNo = *o.PageNo
+		}
+		qPageNo := swag.FormatInt64(qrPageNo)
+		if qPageNo != "" {
+
+			if err := r.SetQueryParam("page_no", qPageNo); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.PageSize != nil {
+
+		// query param page_size
+		var qrPageSize int64
+
+		if o.PageSize != nil {
+			qrPageSize = *o.PageSize
+		}
+		qPageSize := swag.FormatInt64(qrPageSize)
+		if qPageSize != "" {
+
+			if err := r.SetQueryParam("page_size", qPageSize); err != nil {
+				return err
+			}
+		}
+	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

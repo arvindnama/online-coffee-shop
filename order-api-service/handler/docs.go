@@ -36,9 +36,9 @@ type OrderResponse struct {
 // A list of orders
 // swagger:response OrdersResponse
 type OrdersResponse struct {
-	// All orders in DB
+	// Paginated orders
 	// in: body
-	Body []data.Order
+	Body data.OrderPaginated
 }
 
 // swagger:parameters getOrder patchOrder
@@ -54,4 +54,15 @@ type ErrorResponse struct {
 	// collection of errors
 	//in: body
 	Body data.ValidationError
+}
+
+// swagger:parameters getAllOrders
+type GetAllOrdersQueryParams struct {
+	// Page size
+	// in: query
+	PageSize int64 `json:"page_size"`
+
+	// Page No.
+	// in: query
+	PageNo int64 `json:"page_no"`
 }
