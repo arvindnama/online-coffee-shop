@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS orders (
     PRIMARY KEY(id)
 );
 
-CREATE TABLE IF NOT EXISTS products_in_order (
+CREATE TABLE IF NOT EXISTS products (
     `id` INT UNSIGNED NOT NULL,
     `order_id` INT UNSIGNED NOT NULL,
     `name` VARCHAR(225) NOT NULL,

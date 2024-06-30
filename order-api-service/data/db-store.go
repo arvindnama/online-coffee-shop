@@ -16,13 +16,39 @@ type DBOrderStore struct {
 }
 
 const (
-	GET_ALL_ORDERS_SQL           = "SELECT * FROM orders JOIN products_in_order on orders.id = products_in_order.order_id"
-	GET_ORDER_BY_ID_SQL          = "SELECT * FROM orders JOIN products_in_order on orders.id = products_in_order.order_id WHERE orders.id=?"
-	UPDATE_ORDER_STATUS_SQL      = "Update orders SET status = ? where id=?"
-	DELETE_PRODUCTS_IN_ORDER_SQL = "DELETE FROM products_in_order where order_id=?"
-	DELETE_PRODUCT_SQL           = "DELETE FROM orders where id=?"
-	INSERT_ORDER_SQL             = "INSERT INTO orders (name, status, totalPrice) VALUES(?,?,?)"
-	INSERT_PRODUCT_IN_ORDER_SQL  = "INSERT INTO products_in_order (id, order_id, name, quantity, unit_price) VALUES(?,?,?,?, ?)"
+	GET_ALL_ORDERS_SQL = `
+		SELECT orders.id, orders.name,  orders.total_price, orders.status, products.id, products.name, products.quantity, products.unit_price
+		FROM orders 
+		JOIN products on orders.id = products.order_id
+	`
+	GET_ORDER_BY_ID_SQL = `
+		SELECT orders.id, orders.name,  orders.total_price, orders.status, products.id, products.name, products.quantity, products.unit_price 
+		FROM orders 
+		JOIN products on orders.id = products.order_id 
+		WHERE orders.id=?
+	`
+	UPDATE_ORDER_STATUS_SQL = `
+		UPDATE orders 
+		SET status = ? , updated_timestamp=CURRENT_TIMESTAMP
+		WHERE id=?
+	`
+	DELETE_PRODUCTS_IN_ORDER_SQL = `
+		DELETE FROM products
+		WHERE order_id=?
+	`
+	DELETE_PRODUCT_SQL = `
+		DELETE FROM orders where id=?
+	`
+	INSERT_ORDER_SQL = `
+		INSERT INTO 
+		orders (name, status, total_price) 
+		VALUES(?,?,?)
+	`
+	INSERT_PRODUCT_IN_ORDER_SQL = `
+		INSERT INTO 
+		products_in_order (id, order_id, name, quantity, unit_price) 
+		VALUES(?,?,?,?, ?)
+	`
 )
 
 func NewDBOrderStore(logger hclog.Logger) (*DBOrderStore, error) {
@@ -176,7 +202,6 @@ func scanAllOrdersRow(rows *sql.Rows, orders []*Order) ([]*Order, error) {
 		&totalPrice,
 		&status,
 		&product.ID,
-		&orderId,
 		&product.Name,
 		&product.Quantity,
 		&product.UnitPrice,
