@@ -62,6 +62,12 @@ ListProductParams contains all the parameters to send to the API endpoint
 */
 type ListProductParams struct {
 
+	/* Currency.
+
+	   Currency
+	*/
+	Currency *string
+
 	/* ID.
 
 	   The id of the product
@@ -123,6 +129,17 @@ func (o *ListProductParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithCurrency adds the currency to the list product params
+func (o *ListProductParams) WithCurrency(currency *string) *ListProductParams {
+	o.SetCurrency(currency)
+	return o
+}
+
+// SetCurrency adds the currency to the list product params
+func (o *ListProductParams) SetCurrency(currency *string) {
+	o.Currency = currency
+}
+
 // WithID adds the id to the list product params
 func (o *ListProductParams) WithID(id int64) *ListProductParams {
 	o.SetID(id)
@@ -141,6 +158,23 @@ func (o *ListProductParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 		return err
 	}
 	var res []error
+
+	if o.Currency != nil {
+
+		// query param Currency
+		var qrCurrency string
+
+		if o.Currency != nil {
+			qrCurrency = *o.Currency
+		}
+		qCurrency := qrCurrency
+		if qCurrency != "" {
+
+			if err := r.SetQueryParam("Currency", qCurrency); err != nil {
+				return err
+			}
+		}
+	}
 
 	// path param id
 	if err := r.SetPathParam("id", swag.FormatInt64(o.ID)); err != nil {

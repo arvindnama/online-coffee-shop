@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	dataUtils "github.com/arvindnama/golang-microservices/libs/utils/data-utils"
 	"github.com/arvindnama/golang-microservices/product-api-service/data"
@@ -17,9 +18,28 @@ func (p *Products) GetAllProducts(rw http.ResponseWriter, r *http.Request) {
 	p.l.Info("Handle GET products")
 
 	currency := r.URL.Query().Get("currency")
+	pageNoQ := r.URL.Query().Get("page_no")
+	pageSizeQ := r.URL.Query().Get("page_size")
+
+	pageNo := 1
+	pageSize := 10
+
+	if pageNoQ != "" {
+		if val, err := strconv.Atoi(pageNoQ); err == nil {
+			pageNo = val
+		}
+	}
+
+	if pageSizeQ != "" {
+		if val, err := strconv.Atoi(pageSizeQ); err == nil {
+			pageSize = val
+		}
+	}
 
 	p.l.Debug("currency", currency)
-	products, err := p.pDB.GetProducts(currency)
+	p.l.Debug("page_no", pageNo)
+	p.l.Debug("page_size", pageSize)
+	products, hasMore, err := p.pDB.GetProducts(currency, pageNo, pageSize)
 
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
