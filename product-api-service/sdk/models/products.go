@@ -14,7 +14,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// Products Products Products Products Products Products Products Products products
+// Products Products Products Products Products Products Products Products Products products
 //
 // swagger:model Products
 type Products []*Product

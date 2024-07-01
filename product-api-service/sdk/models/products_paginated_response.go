@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// ProductsPaginatedResponse products paginated response
+// ProductsPaginatedResponse ProductsPaginatedResponse products paginated response
 //
 // swagger:model ProductsPaginatedResponse
 type ProductsPaginatedResponse struct {

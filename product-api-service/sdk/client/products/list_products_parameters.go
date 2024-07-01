@@ -213,7 +213,7 @@ func (o *ListProductsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 
 	if o.PageNo != nil {
 
-		// query param PageNo
+		// query param page_no
 		var qrPageNo int64
 
 		if o.PageNo != nil {
@@ -222,7 +222,7 @@ func (o *ListProductsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 		qPageNo := swag.FormatInt64(qrPageNo)
 		if qPageNo != "" {
 
-			if err := r.SetQueryParam("PageNo", qPageNo); err != nil {
+			if err := r.SetQueryParam("page_no", qPageNo); err != nil {
 				return err
 			}
 		}
@@ -230,7 +230,7 @@ func (o *ListProductsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 
 	if o.PageSize != nil {
 
-		// query param PageSize
+		// query param page_size
 		var qrPageSize int64
 
 		if o.PageSize != nil {
@@ -239,7 +239,7 @@ func (o *ListProductsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 		qPageSize := swag.FormatInt64(qrPageSize)
 		if qPageSize != "" {
 
-			if err := r.SetQueryParam("PageSize", qPageSize); err != nil {
+			if err := r.SetQueryParam("page_size", qPageSize); err != nil {
 				return err
 			}
 		}

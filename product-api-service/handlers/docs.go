@@ -76,11 +76,11 @@ type ProductsPaginationQueryParameters struct {
 	// in: query
 	// required: false
 	// default: 1
-	PageNo int
+	PageNo int `json:"page_no"`
 
 	// page size
 	// in:query
 	// required: false
 	// default: 10
-	PageSize int
+	PageSize int `json:"page_size"`
 }
