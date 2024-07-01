@@ -41,13 +41,19 @@ func (p *Products) GetAllProducts(rw http.ResponseWriter, r *http.Request) {
 	p.l.Debug("page_size", pageSize)
 	products, hasMore, err := p.pDB.GetProducts(currency, pageNo, pageSize)
 
+	productsPaginatedResponse := &data.ProductsPaginatedResponse{
+		Content:  products,
+		PageNo:   pageNo,
+		PageSize: pageSize,
+		HasMore:  hasMore,
+	}
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		dataUtils.ToJSON(&GenericError{Message: err.Error()}, rw)
 	}
 
 	rw.Header().Add("Content-Type", "application/json")
-	err = dataUtils.ToJSON(products, rw)
+	err = dataUtils.ToJSON(productsPaginatedResponse, rw)
 
 	if err != nil {
 		http.Error(rw, "Unable to marshal produces", http.StatusInternalServerError)
