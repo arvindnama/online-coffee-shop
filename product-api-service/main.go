@@ -41,7 +41,10 @@ func main() {
 	defer conn.Close()
 	cc := currencyClient.NewCurrencyClient(conn)
 
-	pDB := data.NewProductsDB(logger, cc)
+	pDB, err := data.New(logger, cc)
+	if err != nil {
+		panic(err)
+	}
 	cv := []*dataUtils.CustomValidator{
 		{
 			Field:     "sku",
