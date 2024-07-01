@@ -34,7 +34,7 @@ func initDBConfig() *DBConfig {
 		),
 		DBUserName:             envUtils.GetEnvString("DB_USERNAME", "root"),
 		DBPassword:             envUtils.GetEnvString("DB_PASSWORD", ""),
-		DBName:                 envUtils.GetEnvString("DB_NAME", "baas"),
+		DBName:                 envUtils.GetEnvString("DB_NAME", ""),
 		DBNet:                  envUtils.GetEnvString("DB_NET", "tcp"),
 		DBAllowNativePasswords: envUtils.GetEnvBool("DB_ALLOW_NATIVE_PASSWORDS", true),
 		DBParseTime:            envUtils.GetEnvBool("DB_PARSE_TIME", true),

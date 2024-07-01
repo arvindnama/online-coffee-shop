@@ -5,9 +5,32 @@ import (
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/hashicorp/go-hclog"
+	gormMysqlDriver "gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 func NewDbConnection(config *DBConfig, logger hclog.Logger) (*sql.DB, error) {
+
+	db, err := createSqlConnection(config)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.Ping()
+	if err != nil {
+		return nil, err
+	}
+	logger.Debug("DB: Successfully connected")
+
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
+
+func createSqlConnection(config *DBConfig) (*sql.DB, error) {
 	cfg := mysql.Config{
 		User:                 config.DBUserName,
 		Passwd:               config.DBPassword,
@@ -18,24 +41,17 @@ func NewDbConnection(config *DBConfig, logger hclog.Logger) (*sql.DB, error) {
 		ParseTime:            config.DBParseTime,
 		MultiStatements:      config.DBMultiStatements,
 	}
-	db, err := sql.Open("mysql", cfg.FormatDSN())
-	if err != nil {
-		return nil, err
-	}
-
-	err = initDb(db, logger)
-	if err != nil {
-		return nil, err
-	}
-
-	return db, nil
+	return sql.Open("mysql", cfg.FormatDSN())
 }
 
-func initDb(db *sql.DB, logger hclog.Logger) error {
-	err := db.Ping()
+func NewGormDbConnection(config *DBConfig, logger hclog.Logger) (*gorm.DB, error) {
+
+	sqlDB, err := createSqlConnection(config)
+
 	if err != nil {
-		return err
+		return nil, err
 	}
-	logger.Debug("DB: Successfully connected")
-	return nil
+	return gorm.Open(gormMysqlDriver.New(gormMysqlDriver.Config{
+		Conn: sqlDB,
+	}), &gorm.Config{})
 }
