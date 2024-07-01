@@ -14,6 +14,7 @@ import (
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
 )
 
 // NewListProductsParams creates a new ListProductsParams object,
@@ -60,6 +61,31 @@ ListProductsParams contains all the parameters to send to the API endpoint
 	Typically these are written to a http.Request.
 */
 type ListProductsParams struct {
+
+	/* Currency.
+
+	   Currency
+	*/
+	Currency *string
+
+	/* PageNo.
+
+	   page no
+
+	   Format: int64
+	   Default: 1
+	*/
+	PageNo *int64
+
+	/* PageSize.
+
+	   page size
+
+	   Format: int64
+	   Default: 10
+	*/
+	PageSize *int64
+
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
@@ -77,7 +103,21 @@ func (o *ListProductsParams) WithDefaults() *ListProductsParams {
 //
 // All values with no default are reset to their zero value.
 func (o *ListProductsParams) SetDefaults() {
-	// no default values defined for this parameter
+	var (
+		pageNoDefault = int64(1)
+
+		pageSizeDefault = int64(10)
+	)
+
+	val := ListProductsParams{
+		PageNo:   &pageNoDefault,
+		PageSize: &pageSizeDefault,
+	}
+
+	val.timeout = o.timeout
+	val.Context = o.Context
+	val.HTTPClient = o.HTTPClient
+	*o = val
 }
 
 // WithTimeout adds the timeout to the list products params
@@ -113,6 +153,39 @@ func (o *ListProductsParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithCurrency adds the currency to the list products params
+func (o *ListProductsParams) WithCurrency(currency *string) *ListProductsParams {
+	o.SetCurrency(currency)
+	return o
+}
+
+// SetCurrency adds the currency to the list products params
+func (o *ListProductsParams) SetCurrency(currency *string) {
+	o.Currency = currency
+}
+
+// WithPageNo adds the pageNo to the list products params
+func (o *ListProductsParams) WithPageNo(pageNo *int64) *ListProductsParams {
+	o.SetPageNo(pageNo)
+	return o
+}
+
+// SetPageNo adds the pageNo to the list products params
+func (o *ListProductsParams) SetPageNo(pageNo *int64) {
+	o.PageNo = pageNo
+}
+
+// WithPageSize adds the pageSize to the list products params
+func (o *ListProductsParams) WithPageSize(pageSize *int64) *ListProductsParams {
+	o.SetPageSize(pageSize)
+	return o
+}
+
+// SetPageSize adds the pageSize to the list products params
+func (o *ListProductsParams) SetPageSize(pageSize *int64) {
+	o.PageSize = pageSize
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *ListProductsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -120,6 +193,57 @@ func (o *ListProductsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 		return err
 	}
 	var res []error
+
+	if o.Currency != nil {
+
+		// query param Currency
+		var qrCurrency string
+
+		if o.Currency != nil {
+			qrCurrency = *o.Currency
+		}
+		qCurrency := qrCurrency
+		if qCurrency != "" {
+
+			if err := r.SetQueryParam("Currency", qCurrency); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.PageNo != nil {
+
+		// query param PageNo
+		var qrPageNo int64
+
+		if o.PageNo != nil {
+			qrPageNo = *o.PageNo
+		}
+		qPageNo := swag.FormatInt64(qrPageNo)
+		if qPageNo != "" {
+
+			if err := r.SetQueryParam("PageNo", qPageNo); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.PageSize != nil {
+
+		// query param PageSize
+		var qrPageSize int64
+
+		if o.PageSize != nil {
+			qrPageSize = *o.PageSize
+		}
+		qPageSize := swag.FormatInt64(qrPageSize)
+		if qPageSize != "" {
+
+			if err := r.SetQueryParam("PageSize", qPageSize); err != nil {
+				return err
+			}
+		}
+	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

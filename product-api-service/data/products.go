@@ -40,3 +40,10 @@ type Product struct {
 type Products []*Product
 
 var ErrPrdNotFound = fmt.Errorf("product not found")
+
+type ProductsPaginatedResponse struct {
+	Content  Products `json:"content"`
+	PageNo   int      `json:"pageNo"`
+	PageSize int      `json:"pageSize"`
+	HasMore  bool     `json:"hasMore"`
+}

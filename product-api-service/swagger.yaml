@@ -3,7 +3,7 @@ consumes:
     - application/json
 definitions:
     GenericError:
-        description: GenericError GenericError GenericError GenericError GenericError GenericError generic error
+        description: GenericError GenericError GenericError GenericError GenericError GenericError GenericError generic error
         properties:
             message:
                 description: message
@@ -32,7 +32,7 @@ definitions:
                 x-go-name: Name
             price:
                 description: the price for the product
-                format: float
+                format: double
                 minimum: 0.01
                 type: number
                 x-go-name: Price
@@ -49,13 +49,30 @@ definitions:
         type: object
         x-go-package: github.com/arvindnama/golang-microservices/product-api-service/sdk/models
     Products:
-        description: Products Products Products Products Products Products products
+        description: Products Products Products Products Products Products Products products
         items:
             $ref: '#/definitions/Product'
         type: array
         x-go-package: github.com/arvindnama/golang-microservices/product-api-service/sdk/models
+    ProductsPaginatedResponse:
+        properties:
+            content:
+                $ref: '#/definitions/Products'
+            hasMore:
+                type: boolean
+                x-go-name: HasMore
+            pageNo:
+                format: int64
+                type: integer
+                x-go-name: PageNo
+            pageSize:
+                format: int64
+                type: integer
+                x-go-name: PageSize
+        type: object
+        x-go-package: github.com/arvindnama/golang-microservices/product-api-service/data
     ValidationError:
-        description: ValidationError ValidationError ValidationError is a collection error messages
+        description: ValidationError ValidationError is a collection error messages
         properties:
             messages:
                 description: messages
@@ -79,6 +96,18 @@ paths:
                   in: query
                   name: Currency
                   type: string
+                - default: 1
+                  description: page no
+                  format: int64
+                  in: query
+                  name: PageNo
+                  type: integer
+                - default: 10
+                  description: page size
+                  format: int64
+                  in: query
+                  name: PageSize
+                  type: integer
             responses:
                 "200":
                     $ref: '#/responses/ProductsResponse'
@@ -183,7 +212,7 @@ responses:
     ProductsResponse:
         description: A list of products
         schema:
-            $ref: '#/definitions/Products'
+            $ref: '#/definitions/ProductsPaginatedResponse'
 schemes:
     - http
 swagger: "2.0"

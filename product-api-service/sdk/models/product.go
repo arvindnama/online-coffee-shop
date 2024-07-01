@@ -14,7 +14,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// Product Product defines the structure for an API products
+// Product Product Product defines the structure for an API products
 //
 // swagger:model Product
 type Product struct {
@@ -36,7 +36,7 @@ type Product struct {
 	// the price for the product
 	// Required: true
 	// Minimum: 0.01
-	Price *float32 `json:"price"`
+	Price *float64 `json:"price"`
 
 	// the SKU for the product
 	// Required: true
@@ -118,7 +118,7 @@ func (m *Product) validatePrice(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Minimum("price", "body", float64(*m.Price), 0.01, false); err != nil {
+	if err := validate.Minimum("price", "body", *m.Price, 0.01, false); err != nil {
 		return err
 	}
 

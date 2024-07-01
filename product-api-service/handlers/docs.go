@@ -22,7 +22,7 @@ import "github.com/arvindnama/golang-microservices/product-api-service/data"
 type ProductsResponse struct {
 	// All products in the system
 	// in: body
-	Body data.Products
+	Body data.ProductsPaginatedResponse
 }
 
 // Product
@@ -68,4 +68,19 @@ type ProductQueryParameter struct {
 	//in: query
 	//required: false
 	Currency string
+}
+
+// swagger:parameters listProducts
+type ProductsPaginationQueryParameters struct {
+	// page no
+	// in: query
+	// required: false
+	// default: 1
+	PageNo int
+
+	// page size
+	// in:query
+	// required: false
+	// default: 10
+	PageSize int
 }

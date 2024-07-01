@@ -52,7 +52,7 @@ ListProductsOK describes a response with status code 200, with default header va
 A list of products
 */
 type ListProductsOK struct {
-	Payload models.Products
+	Payload *models.ProductsPaginatedResponse
 }
 
 // IsSuccess returns true when this list products o k response has a 2xx status code
@@ -95,14 +95,16 @@ func (o *ListProductsOK) String() string {
 	return fmt.Sprintf("[GET /products][%d] listProductsOK %s", 200, payload)
 }
 
-func (o *ListProductsOK) GetPayload() models.Products {
+func (o *ListProductsOK) GetPayload() *models.ProductsPaginatedResponse {
 	return o.Payload
 }
 
 func (o *ListProductsOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
+	o.Payload = new(models.ProductsPaginatedResponse)
+
 	// response payload
-	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 

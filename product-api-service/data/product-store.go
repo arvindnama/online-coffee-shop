@@ -42,14 +42,26 @@ func New(logger hclog.Logger, currencySvc protos.CurrencyClient) (*ProductsStore
 	return store, nil
 }
 
-func (store *ProductsStore) GetProducts(currency string) (Products, error) {
+func (store *ProductsStore) GetProducts(
+	currency string,
+	pageNo,
+	pageSize int,
+) (Products, bool, error) {
+
+	// adding one more to the pageSize to evaluate if there is more elements in DB
+	// if sql query return `pageSize + 1` entries then there
+	// is at-least one more elements present in the db ( in the next page)
+	limit := pageSize + 1
+	offset := (pageNo - 1) * pageSize
 
 	var products Products
 
-	store.dbConn.Find(&products)
+	store.dbConn.Limit(limit).Offset(offset).Find(&products)
 	err := store.updateProductRate(currency, products)
 
-	return products, err
+	hasMore := len(products) == pageSize+1
+
+	return products, hasMore, err
 
 }
 
