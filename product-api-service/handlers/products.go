@@ -14,7 +14,7 @@ import (
 type Products struct {
 	l   hclog.Logger
 	v   *dataUtils.Validation
-	pDB *data.ProductsDB
+	pDB *data.ProductsStore
 }
 
 type KeyProduct struct {
@@ -23,7 +23,7 @@ type KeyProduct struct {
 func NewProducts(
 	l hclog.Logger,
 	v *dataUtils.Validation,
-	pDB *data.ProductsDB,
+	pDB *data.ProductsStore,
 ) *Products {
 	return &Products{l, v, pDB}
 }

@@ -6,3 +6,12 @@ swagger: check_install
 
 generate_client:
 	cd sdk && swagger generate client -f ../swagger.yaml -A product-api
+
+migration:
+	@migrate create -ext sql -dir migrate/migrations $(filter-out $@,$(MAKECMDGOALS)) 
+
+migrate-up:
+	@go run migrate/main.go up
+
+migrate-down:
+	@go run migrate/main.go down
