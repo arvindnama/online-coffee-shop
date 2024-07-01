@@ -3,7 +3,7 @@ consumes:
     - application/json
 definitions:
     GenericError:
-        description: GenericError GenericError GenericError GenericError GenericError GenericError GenericError generic error
+        description: GenericError GenericError GenericError GenericError GenericError GenericError GenericError GenericError generic error
         properties:
             message:
                 description: message
@@ -12,7 +12,7 @@ definitions:
         type: object
         x-go-package: github.com/arvindnama/golang-microservices/product-api-service/sdk/models
     Product:
-        description: Product Product defines the structure for an API products
+        description: Product defines the structure for an API products
         properties:
             description:
                 description: the description for this product
@@ -47,32 +47,36 @@ definitions:
             - price
             - sku
         type: object
-        x-go-package: github.com/arvindnama/golang-microservices/product-api-service/sdk/models
+        x-go-package: github.com/arvindnama/golang-microservices/product-api-service/data
     Products:
-        description: Products Products Products Products Products Products Products products
+        description: Products Products Products Products Products Products Products Products products
         items:
             $ref: '#/definitions/Product'
         type: array
         x-go-package: github.com/arvindnama/golang-microservices/product-api-service/sdk/models
     ProductsPaginatedResponse:
+        description: ProductsPaginatedResponse products paginated response
         properties:
             content:
                 $ref: '#/definitions/Products'
             hasMore:
+                description: has more
                 type: boolean
                 x-go-name: HasMore
             pageNo:
+                description: page no
                 format: int64
                 type: integer
                 x-go-name: PageNo
             pageSize:
+                description: page size
                 format: int64
                 type: integer
                 x-go-name: PageSize
         type: object
-        x-go-package: github.com/arvindnama/golang-microservices/product-api-service/data
+        x-go-package: github.com/arvindnama/golang-microservices/product-api-service/sdk/models
     ValidationError:
-        description: ValidationError ValidationError is a collection error messages
+        description: ValidationError ValidationError ValidationError is a collection error messages
         properties:
             messages:
                 description: messages
@@ -100,14 +104,16 @@ paths:
                   description: page no
                   format: int64
                   in: query
-                  name: PageNo
+                  name: page_no
                   type: integer
+                  x-go-name: PageNo
                 - default: 10
                   description: page size
                   format: int64
                   in: query
-                  name: PageSize
+                  name: page_size
                   type: integer
+                  x-go-name: PageSize
             responses:
                 "200":
                     $ref: '#/responses/ProductsResponse'
