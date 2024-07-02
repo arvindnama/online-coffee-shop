@@ -2,3 +2,4 @@ node_modules
 **/imagesstore/*
 
 **/.bin/**
+./.mysql-volume
