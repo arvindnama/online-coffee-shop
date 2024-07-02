@@ -1,6 +1,7 @@
 package data
 
 import (
+	"crypto/tls"
 	"encoding/xml"
 	"fmt"
 	"math/rand"
@@ -35,7 +36,11 @@ func NewExchangeRates(logger hclog.Logger) (*ExchangeRates, error) {
 
 func (e *ExchangeRates) getRates() error {
 	e.logger.Debug("Fetching Rates from Central Bank Exchange")
-	resp, err := http.DefaultClient.Get(centralBankExchangeRateUrl)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+	resp, err := client.Get(centralBankExchangeRateUrl)
 
 	if err != nil {
 		e.logger.Error(fmt.Sprintf("Error Fetching Rates from Central Bank Exchange:: %#v\n", err))

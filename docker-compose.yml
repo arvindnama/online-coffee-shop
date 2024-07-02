@@ -1,6 +1,7 @@
 version: '3.1'
 services:
   mysql-db:
+    container_name: mysql
     image: mysql
     restart: always
     command: --init-file /data/application/init.sql
@@ -17,6 +18,7 @@ services:
       retries: 10
 
   currency-service:
+    container_name: currency-service
     image: "currency-service:latest"
     ports:
       - "9092:8080"
@@ -24,6 +26,7 @@ services:
       - LOG_LEVEL=trace
 
   product-api-service:
+    container_name: product-api-service
     image: "product-api-service:latest"
     depends_on:
       mysql-db:
@@ -42,6 +45,7 @@ services:
       - DB_NAME=productsDB
 
   order-api-service:
+    container_name: order-api-service
     image: "order-api-service:latest"
     depends_on:
       mysql-db:
