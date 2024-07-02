@@ -15,3 +15,6 @@ migrate-up:
 
 migrate-down:
 	@go run migrate/main.go down
+
+run:
+	ls **/*.go | entr -r go run .

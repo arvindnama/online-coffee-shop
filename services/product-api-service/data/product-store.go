@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"regexp"
 
-	protos "github.com/arvindnama/golang-microservices/currency-service/protos"
+	currencyProtos "github.com/arvindnama/golang-microservices/libs/grpc-protos/currency"
 	dbUtils "github.com/arvindnama/golang-microservices/libs/utils/db-utils"
 	"github.com/arvindnama/golang-microservices/product-api-service/config"
 	"github.com/go-playground/validator/v10"
@@ -16,14 +16,14 @@ import (
 )
 
 type ProductsStore struct {
-	currencySvc   protos.CurrencyClient
+	currencySvc   currencyProtos.CurrencyClient
 	logger        hclog.Logger
 	rates         map[string]float64
-	subRateClient protos.Currency_SubscribeRatesClient
+	subRateClient currencyProtos.Currency_SubscribeRatesClient
 	dbConn        *gorm.DB
 }
 
-func New(logger hclog.Logger, currencySvc protos.CurrencyClient) (*ProductsStore, error) {
+func New(logger hclog.Logger, currencySvc currencyProtos.CurrencyClient) (*ProductsStore, error) {
 	dbConn, err := dbUtils.NewGormDbConnection(&config.ENV.DBConfig, logger)
 
 	if err != nil {
@@ -129,15 +129,15 @@ func (store *ProductsStore) getRate(currency string) (float64, error) {
 		return cr, nil
 	}
 
-	req := &protos.RateRequest{
-		Base:        protos.Currencies_EUR,
-		Destination: protos.Currencies(protos.Currencies_value[currency]),
+	req := &currencyProtos.RateRequest{
+		Base:        currencyProtos.Currencies_EUR,
+		Destination: currencyProtos.Currencies(currencyProtos.Currencies_value[currency]),
 	}
 	resp, err := store.currencySvc.GetRate(context.Background(), req)
 
 	if err != nil {
 		if s, ok := status.FromError(err); ok {
-			md := s.Details()[0].(*protos.RateRequest)
+			md := s.Details()[0].(*currencyProtos.RateRequest)
 			if s.Code() == codes.InvalidArgument {
 				return -1, fmt.Errorf(
 					"unable to get rate from currency server base: %s & dest: %s cannot be same",
@@ -156,7 +156,7 @@ func (store *ProductsStore) getRate(currency string) (float64, error) {
 
 	store.logger.Debug(
 		"gRPC currency client GetRate",
-		"src", protos.Currencies_EUR,
+		"src", currencyProtos.Currencies_EUR,
 		"dest", currency,
 		"rate", resp.Rate,
 	)

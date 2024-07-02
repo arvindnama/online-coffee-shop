@@ -4,7 +4,7 @@ import (
 	"os"
 
 	dbUtils "github.com/arvindnama/golang-microservices/libs/utils/db-utils"
-	"github.com/arvindnama/golang-microservices/order-service/config"
+	"github.com/arvindnama/golang-microservices/product-api-service/config"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate/v4"
