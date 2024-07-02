@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"time"
 
-	currencyClient "github.com/arvindnama/golang-microservices/currency-service/protos"
+	currency "github.com/arvindnama/golang-microservices/libs/grpc-protos/currency"
 	dataUtils "github.com/arvindnama/golang-microservices/libs/utils/data-utils"
 	"github.com/arvindnama/golang-microservices/product-api-service/config"
 	"github.com/arvindnama/golang-microservices/product-api-service/data"
@@ -39,7 +39,7 @@ func main() {
 		panic(err)
 	}
 	defer conn.Close()
-	cc := currencyClient.NewCurrencyClient(conn)
+	cc := currency.NewCurrencyClient(conn)
 
 	pDB, err := data.New(logger, cc)
 	if err != nil {

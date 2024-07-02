@@ -1,4 +1,4 @@
-package main
+package routes
 
 import (
 	"net/http"
@@ -8,7 +8,7 @@ import (
 	openApiMiddleware "github.com/go-openapi/runtime/middleware"
 )
 
-func loadRoutes(
+func LoadRoutes(
 	m *middleware.Middleware,
 	h *handler.OrderHandler,
 	router *http.ServeMux,

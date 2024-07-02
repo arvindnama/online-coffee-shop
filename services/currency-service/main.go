@@ -8,8 +8,8 @@ import (
 
 	"github.com/arvindnama/golang-microservices/currency-service/config"
 	"github.com/arvindnama/golang-microservices/currency-service/data"
-	protos "github.com/arvindnama/golang-microservices/currency-service/protos"
 	"github.com/arvindnama/golang-microservices/currency-service/server"
+	currency "github.com/arvindnama/golang-microservices/libs/grpc-protos/currency"
 	"github.com/hashicorp/go-hclog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -30,7 +30,7 @@ func main() {
 	}
 	cs := server.NewCurrency(logger, er)
 
-	protos.RegisterCurrencyServer(gs, cs)
+	currency.RegisterCurrencyServer(gs, cs)
 
 	bindAddress := config.Env.Address
 	lis, err := net.Listen("tcp", bindAddress)

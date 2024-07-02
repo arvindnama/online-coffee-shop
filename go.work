@@ -1,9 +1,0 @@
-go 1.22.3
-
-use (
-	./currency-service
-	./order-api-service
-	./product-images-service
-	./product-api-service
-	./libs/utils
-)
