@@ -4,9 +4,16 @@ BINARY_NAME=order-api-service
 build:
 	 GOOS=linux GOARCH=amd64 go build -o ./.bin/${BINARY_NAME}-linux main.go
 	 GOOS=darwin GOARCH=arm64 go build -o ./.bin/${BINARY_NAME}-darwin main.go
+
+build-migration-tool:
+	 GOOS=linux GOARCH=amd64 go build -o ./.bin/${BINARY_NAME}-migration-linux migration-main.go
+	 GOOS=darwin GOARCH=arm64 go build -o ./.bin/${BINARY_NAME}-migration-darwin migration-main.go
 	 
+build-docker-image: build build-migration-tool
+	docker build -t order-api-service:latest .
+
 run-dev:
-	ls **/*.go | entr -r go run .
+	ls **/*.go | entr -r go run main.go
 
 run: build
 	./.bin/${BINARY_NAME}-darwin
@@ -30,7 +37,7 @@ migration:
 	@migrate create -ext sql -dir migrate/migrations $(filter-out $@,$(MAKECMDGOALS)) 
 
 migrate-up:
-	@go run migrate/main.go up
+	@go run migration-main.go up
 
 migrate-down:
-	@go run migrate/main.go down
+	@go run migration-main.go down

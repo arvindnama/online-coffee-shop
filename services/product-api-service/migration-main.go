@@ -17,40 +17,41 @@ func main() {
 
 	logger := hclog.New(&hclog.LoggerOptions{
 		Name:  "Products Api Service Migration tool",
-		Level: hclog.LevelFromString(config.Env.LogLevel),
+		Level: hclog.LevelFromString(config.ENV.LogLevel),
 	})
 
-	db, err := dbUtils.NewDbConnection(&config.Env.DBConfig, logger)
-	checkDBError(err)
+	db, err := dbUtils.NewDbConnection(&config.ENV.DBConfig, logger)
+	checkDBError("DBConnection", err, logger)
 
 	driver, err := mysql.WithInstance(db, &mysql.Config{})
-	checkDBError(err)
+	checkDBError("DB Driver creation", err, logger)
 
 	m, err := migrate.NewWithDatabaseInstance(
 		"file://migrate/migrations",
 		"mysql",
 		driver,
 	)
-	checkDBError(err)
+	checkDBError("Migration Scripts initialization", err, logger)
 
 	cmd := os.Args[len(os.Args)-1]
 
 	if cmd == "up" {
 		if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-			checkDBError(err)
+			checkDBError("Migration up", err, logger)
 		}
 	}
 
 	if cmd == "down" {
 		if err := m.Down(); err != nil && err != migrate.ErrNoChange {
-			checkDBError(err)
+			checkDBError("Migration down", err, logger)
 		}
 	}
 
 }
 
-func checkDBError(err error) {
+func checkDBError(source string, err error, logger hclog.Logger) {
 	if err != nil {
+		logger.Error(source, err)
 		panic(err)
 	}
 

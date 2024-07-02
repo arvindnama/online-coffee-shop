@@ -1,0 +1,63 @@
+version: '3.1'
+services:
+  mysql-db:
+    image: mysql
+    restart: always
+    command: --init-file /data/application/init.sql
+    ports:
+      - "33061:3306"
+    volumes:
+      - my-sql-data-dir:/var/lib/mysql
+      - ./db-init/db-init.sql:/data/application/init.sql
+    environment:
+      MYSQL_ROOT_PASSWORD: "nopassword"
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  currency-service:
+    image: "currency-service:latest"
+    ports:
+      - "9092:8080"
+    environment:
+      - LOG_LEVEL=trace
+
+  product-api-service:
+    image: "product-api-service:latest"
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      currency-service:
+        condition: service_started
+    ports:
+      - "9090:8080"
+    environment:
+      - LOG_LEVEL=trace
+      - CS_ADDRESS=currency-service:8080
+      - DB_HOST=mysql-db
+      - DB_PORT=3306
+      - DB_USERNAME=root
+      - DB_PASSWORD=nopassword
+      - DB_NAME=productsDB
+
+  order-api-service:
+    image: "order-api-service:latest"
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      currency-service:
+        condition: service_started
+    ports:
+      - "9093:8080"
+    environment:
+      - LOG_LEVEL=trace
+      - DB_HOST=mysql-db
+      - DB_PORT=3306
+      - DB_USERNAME=root
+      - DB_PASSWORD=nopassword
+      - DB_NAME=ordersDB
+
+
+volumes:
+  my-sql-data-dir: 

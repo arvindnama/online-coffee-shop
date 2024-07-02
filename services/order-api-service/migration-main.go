@@ -22,35 +22,36 @@ func main() {
 
 	store, err := data.NewDBOrderStore(logger)
 
-	checkDBError(err)
+	checkDBError("DBConnection", err, logger)
 
 	driver, err := mysql.WithInstance(store.DB, &mysql.Config{})
-	checkDBError(err)
+	checkDBError("DB Driver creation", err, logger)
 
 	m, err := migrate.NewWithDatabaseInstance(
 		"file://migrate/migrations",
 		"mysql",
 		driver,
 	)
-	checkDBError(err)
+	checkDBError("Migration Scripts initialization", err, logger)
 
 	cmd := os.Args[len(os.Args)-1]
 
 	if cmd == "up" {
 		if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-			checkDBError(err)
+			checkDBError("Migration up", err, logger)
 		}
 	}
 
 	if cmd == "down" {
 		if err := m.Down(); err != nil && err != migrate.ErrNoChange {
-			checkDBError(err)
+			checkDBError("Migration down", err, logger)
 		}
 	}
 }
 
-func checkDBError(err error) {
+func checkDBError(source string, err error, logger hclog.Logger) {
 	if err != nil {
+		logger.Error(source, err)
 		panic(err)
 	}
 
