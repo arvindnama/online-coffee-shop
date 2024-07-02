@@ -6,7 +6,7 @@ build:
 	 GOOS=darwin GOARCH=arm64 go build -o ./.bin/${BINARY_NAME}-darwin main.go
 	 
 run-dev:
-	ls **/*.go | entr -r go run .
+	ls **/*.go | entr -r go run main.go
 
 run: build
 	./.bin/${BINARY_NAME}-darwin
@@ -15,3 +15,7 @@ clean:
 	go clean
 	rm -rf ./.bin/${BINARY_NAME}-darwin
 	rm -rf ./.bin/${BINARY_NAME}-linux
+
+
+build-docker-image: build
+	docker build -t currency-service:latest .
