@@ -5,7 +5,7 @@ import (
 	"io"
 	"time"
 
-	protos "github.com/arvindnama/golang-microservices/currency-service/protos"
+	currency "github.com/arvindnama/golang-microservices/libs/grpc-protos/currency"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -17,14 +17,14 @@ import (
 type Currency struct {
 	logger hclog.Logger
 	rates  *data.ExchangeRates
-	subs   map[protos.Currency_SubscribeRatesServer][]*protos.RateRequest
+	subs   map[currency.Currency_SubscribeRatesServer][]*currency.RateRequest
 }
 
 func NewCurrency(logger hclog.Logger, rates *data.ExchangeRates) *Currency {
 	//[learning] make method is use to `make` similar to alloco / calloc
 	// alternatively in case of structs and map you use type{} to create
 	// subs := map[protos.Currency_SubscribeRatesServer]*[]protos.RateRequest{}
-	subs := make(map[protos.Currency_SubscribeRatesServer][]*protos.RateRequest)
+	subs := make(map[currency.Currency_SubscribeRatesServer][]*currency.RateRequest)
 	c := &Currency{logger, rates, subs}
 	go c.handleRateUpdates()
 	return c
@@ -32,8 +32,8 @@ func NewCurrency(logger hclog.Logger, rates *data.ExchangeRates) *Currency {
 
 func (c *Currency) GetRate(
 	ctx context.Context,
-	req *protos.RateRequest,
-) (*protos.RateResponse, error) {
+	req *currency.RateRequest,
+) (*currency.RateResponse, error) {
 
 	c.logger.Info(
 		"handle GetRate",
@@ -62,7 +62,7 @@ func (c *Currency) GetRate(
 	if err != nil {
 		return nil, err
 	}
-	return &protos.RateResponse{
+	return &currency.RateResponse{
 			Base:        req.Base,
 			Destination: req.Destination,
 			Rate:        cr,
@@ -94,9 +94,9 @@ func (c *Currency) handleRateUpdates() {
 				)
 
 				err = sub.Send(
-					&protos.StreamingRateResponse{
-						Message: &protos.StreamingRateResponse_RateResponse{
-							RateResponse: &protos.RateResponse{
+					&currency.StreamingRateResponse{
+						Message: &currency.StreamingRateResponse_RateResponse{
+							RateResponse: &currency.RateResponse{
 								Base:        request.Base,
 								Destination: request.Destination,
 								Rate:        rate,
@@ -114,7 +114,7 @@ func (c *Currency) handleRateUpdates() {
 }
 
 func (c *Currency) SubscribeRates(
-	src protos.Currency_SubscribeRatesServer,
+	src currency.Currency_SubscribeRatesServer,
 ) error {
 	for {
 		rr, err := src.Recv()
@@ -138,7 +138,7 @@ func (c *Currency) SubscribeRates(
 
 		if !ok {
 			// [learning]: make cannot be used in create slice ?? (get more info)
-			sub = []*protos.RateRequest{}
+			sub = []*currency.RateRequest{}
 		}
 
 		var validationStatus *status.Status
@@ -157,8 +157,8 @@ func (c *Currency) SubscribeRates(
 		}
 
 		if validationStatus != nil {
-			src.Send(&protos.StreamingRateResponse{
-				Message: &protos.StreamingRateResponse_Error{
+			src.Send(&currency.StreamingRateResponse{
+				Message: &currency.StreamingRateResponse_Error{
 					Error: validationStatus.Proto(),
 				},
 			})
