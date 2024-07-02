@@ -2,6 +2,7 @@ package dbUtils
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/hashicorp/go-hclog"
@@ -11,7 +12,7 @@ import (
 
 func NewDbConnection(config *DBConfig, logger hclog.Logger) (*sql.DB, error) {
 
-	db, err := createSqlConnection(config)
+	db, err := createSqlConnection(config, logger)
 
 	if err != nil {
 		return nil, err
@@ -30,7 +31,7 @@ func NewDbConnection(config *DBConfig, logger hclog.Logger) (*sql.DB, error) {
 	return db, nil
 }
 
-func createSqlConnection(config *DBConfig) (*sql.DB, error) {
+func createSqlConnection(config *DBConfig, logger hclog.Logger) (*sql.DB, error) {
 	cfg := mysql.Config{
 		User:                 config.DBUserName,
 		Passwd:               config.DBPassword,
@@ -41,12 +42,14 @@ func createSqlConnection(config *DBConfig) (*sql.DB, error) {
 		ParseTime:            config.DBParseTime,
 		MultiStatements:      config.DBMultiStatements,
 	}
+
+	logger.Debug(fmt.Sprintf("*** DB Config: %#v\n", cfg))
 	return sql.Open("mysql", cfg.FormatDSN())
 }
 
 func NewGormDbConnection(config *DBConfig, logger hclog.Logger) (*gorm.DB, error) {
 
-	sqlDB, err := createSqlConnection(config)
+	sqlDB, err := createSqlConnection(config, logger)
 
 	if err != nil {
 		return nil, err
