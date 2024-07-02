@@ -13,6 +13,7 @@ import (
 	"github.com/arvindnama/golang-microservices/order-service/data"
 	"github.com/arvindnama/golang-microservices/order-service/handler"
 	"github.com/arvindnama/golang-microservices/order-service/middleware"
+	"github.com/arvindnama/golang-microservices/order-service/routes"
 	"github.com/hashicorp/go-hclog"
 )
 
@@ -39,7 +40,7 @@ func main() {
 
 	router := http.NewServeMux()
 
-	loadRoutes(m, h, router)
+	routes.LoadRoutes(m, h, router)
 
 	stack := middleware.CreateMiddlewareStack(
 		m.Logging,
