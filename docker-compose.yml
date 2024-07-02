@@ -24,6 +24,7 @@ services:
       - "9092:8080"
     environment:
       - LOG_LEVEL=trace
+      - RATE_POLLING_INTERVAL=2
 
   product-api-service:
     container_name: product-api-service
@@ -56,6 +57,7 @@ services:
       - "9093:8080"
     environment:
       - LOG_LEVEL=trace
+      - USE_DB=true
       - DB_HOST=mysql-db
       - DB_PORT=3306
       - DB_USERNAME=root

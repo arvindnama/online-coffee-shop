@@ -25,8 +25,8 @@ func LoadRoutes(
 		m.DeserializeRequestBody,
 	)
 
-	router.HandleFunc("GET /orders/{id}", h.GetOrder)
-	router.HandleFunc("GET /orders", h.GetAllOrders)
+	router.Handle("GET /orders/{id}", m.IsAuthenticated(http.HandlerFunc(h.GetOrder)))
+	router.Handle("GET /orders", m.IsAuthenticated(http.HandlerFunc(h.GetAllOrders)))
 	router.Handle("POST /orders", requestBodyMiddleware(http.HandlerFunc(h.CreateOrder)))
 	router.Handle("PATCH /orders/{id}", requestBodyNoValidationMiddleware(http.HandlerFunc(h.PatchOrder)))
 
