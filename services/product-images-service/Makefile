@@ -6,7 +6,7 @@ build:
 	 GOOS=darwin GOARCH=arm64 go build -o ./.bin/${BINARY_NAME}-darwin main.go
 	 
 run-dev:
-	ls **/*.go | entr -r go run .
+	ls **/*.go | entr -r go run main.go
 
 run: build
 	./.bin/${BINARY_NAME}-darwin
