@@ -34,13 +34,16 @@ func NewExchangeRates(logger hclog.Logger) (*ExchangeRates, error) {
 }
 
 func (e *ExchangeRates) getRates() error {
+	e.logger.Debug("Fetching Rates from Central Bank Exchange")
 	resp, err := http.DefaultClient.Get(centralBankExchangeRateUrl)
 
 	if err != nil {
+		e.logger.Error(fmt.Sprintf("Error Fetching Rates from Central Bank Exchange:: %#v\n", err))
 		return err
 	}
 
 	if resp.StatusCode != http.StatusOK {
+		e.logger.Error(fmt.Sprintf("Error Fetching Rates from Central Bank Exchange:: %#v\n", resp))
 		return fmt.Errorf("expected Status code 200 got %v", resp.StatusCode)
 
 	}
@@ -58,6 +61,8 @@ func (e *ExchangeRates) getRates() error {
 		e.rates[c.Currency] = r
 	}
 	e.rates["EUR"] = 1
+
+	e.logger.Debug(fmt.Sprintf("Rate Cache:: %#v\n", e.rates))
 
 	return nil
 }

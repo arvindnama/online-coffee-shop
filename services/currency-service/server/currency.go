@@ -52,6 +52,12 @@ func (c *Currency) GetRate(
 
 		//[learning]: This rear code block, just being defensive
 		if wde != nil {
+			c.logger.Error(
+				"handle GetRate",
+				"base", req.GetBase(),
+				"destination", req.GetDestination(),
+				wde,
+			)
 			return nil, wde
 		}
 
@@ -60,6 +66,12 @@ func (c *Currency) GetRate(
 
 	cr, err := c.rates.GetRate(req.GetBase().String(), req.GetDestination().String())
 	if err != nil {
+		c.logger.Error(
+			"handle GetRate",
+			"base", req.GetBase(),
+			"destination", req.GetDestination(),
+			err,
+		)
 		return nil, err
 	}
 	return &currency.RateResponse{
