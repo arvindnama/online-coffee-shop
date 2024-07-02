@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"github.com/arvindnama/golang-microservices/currency-service/config"
 	"github.com/arvindnama/golang-microservices/currency-service/data"
 
 	"github.com/hashicorp/go-hclog"
@@ -84,7 +85,7 @@ func (c *Currency) GetRate(
 }
 
 func (c *Currency) handleRateUpdates() {
-	ru := c.rates.MonitorRates(5 * time.Second)
+	ru := c.rates.MonitorRates(time.Duration(config.Env.RatePollingInterval) * time.Minute)
 	for range ru {
 		c.logger.Debug("Got Updated Rate")
 		for sub, requests := range c.subs {
